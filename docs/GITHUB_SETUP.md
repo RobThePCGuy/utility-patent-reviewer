@@ -254,6 +254,24 @@ Recommended configuration:
 
 ## GitHub Actions & Automation
 
+### Security Scanning Workflow (Already Configured)
+
+The repository now includes `.github/workflows/security-scan.yml` which runs:
+
+**On every push/PR to master and weekly:**
+- **CodeQL Analysis** - Static code security scanning
+- **Bandit Security Check** - Python-specific vulnerability detection
+- **Safety Check** - Dependency vulnerability scanning
+- **TruffleHog Secret Scanning** - Detects exposed secrets
+- **Dependency Review** - Checks PRs for vulnerable dependencies
+
+**No action required** - This workflow is already configured and will run automatically.
+
+**Required status checks to add to branch protection:**
+- `CodeQL Analysis`
+- `Bandit Security Check`
+- `Safety Dependency Check`
+
 ### Basic Testing Workflow
 
 Create `.github/workflows/tests.yml`:

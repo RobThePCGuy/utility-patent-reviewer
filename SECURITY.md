@@ -405,6 +405,6 @@ For security-related questions (not vulnerabilities), you can:
 
 ---
 
-**Last Updated:** 2025-01-10
+**Last Updated:** 2025-11-10
 
-**Next Review:** 2025-04-10 (quarterly reviews)
+**Next Review:** 2026-02-10 (quarterly reviews)

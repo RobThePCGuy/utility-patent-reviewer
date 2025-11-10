@@ -86,12 +86,25 @@ coverage.xml
 # Environments
 .env
 .env.local
+.env.*.local
 .venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
+
+# API Keys and Secrets (extra safety)
+*.key
+*.pem
+*.cer
+*.crt
+secrets.txt
+secrets.json
+credentials.json
+.secrets/
+*_secret*
+*_secrets*
 
 # ============================================================================
 # IDE / Editors
