@@ -125,6 +125,7 @@ pip list  # Should only show project dependencies
 3. Fill out the advisory form
 
 **Alternative method:** Please use GitHub Security Advisories only.
+
 ### What to Include
 
 Help us understand the issue by providing:
