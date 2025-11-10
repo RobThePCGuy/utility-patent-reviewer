@@ -294,8 +294,12 @@ jobs:
         pytest --cov=mcp_server --cov-report=xml
 
     - name: Upload coverage
-      # Note: codecov/codecov-action@v4 may require a CODECOV_TOKEN. See https://github.com/codecov/codecov-action/releases for details.
+      # Note: codecov/codecov-action@v4 may require a CODECOV_TOKEN, especially for private repositories or some CI environments.
+      # To provide the token, set it as a repository secret named CODECOV_TOKEN and pass it as shown below.
+      # See https://github.com/codecov/codecov-action/releases for details.
       uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
 ```
 
