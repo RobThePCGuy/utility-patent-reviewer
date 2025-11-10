@@ -124,10 +124,7 @@ pip list  # Should only show project dependencies
 2. Click "Report a vulnerability"
 3. Fill out the advisory form
 
-**Alternative method:** Direct contact
-- Email: [Create a temporary secure email if needed]
-- Include "SECURITY" in the subject line
-
+**Alternative method:** No email option available. Please use GitHub Security Advisories only.
 ### What to Include
 
 Help us understand the issue by providing:
