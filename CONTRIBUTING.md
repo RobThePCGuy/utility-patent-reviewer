@@ -411,7 +411,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 # Feature
 feat(search): add support for European Patent Office data
 
-Implement EPO patent search using espacenet API. Includes:
+Implement EPO patent search using Espacenet API. Includes:
 - API client with rate limiting
 - Result normalization to match USPTO format
 - Error handling and retries
