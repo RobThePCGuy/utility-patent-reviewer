@@ -399,7 +399,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 - **feat:** New feature
 - **fix:** Bug fix
 - **docs:** Documentation only
-- **style:** Formatting, missing semicolons, etc.
+- **style:** Formatting, whitespace, etc.
 - **refactor:** Code change that neither fixes a bug nor adds a feature
 - **perf:** Performance improvement
 - **test:** Adding or updating tests
