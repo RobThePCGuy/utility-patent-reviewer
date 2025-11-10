@@ -294,7 +294,8 @@ jobs:
         pytest --cov=mcp_server --cov-report=xml || echo "No tests yet"
 
     - name: Upload coverage
-      uses: codecov/codecov-action@v3
+      # Note: codecov/codecov-action@v4 may require a CODECOV_TOKEN. See https://github.com/codecov/codecov-action/releases for details.
+      uses: codecov/codecov-action@v4
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
 ```
 
