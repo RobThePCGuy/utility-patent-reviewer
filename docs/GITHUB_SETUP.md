@@ -291,7 +291,7 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest --cov=mcp_server --cov-report=xml || echo "No tests yet"
+        pytest --cov=mcp_server --cov-report=xml
 
     - name: Upload coverage
       # Note: codecov/codecov-action@v4 may require a CODECOV_TOKEN. See https://github.com/codecov/codecov-action/releases for details.
