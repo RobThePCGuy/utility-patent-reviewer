@@ -1,0 +1,41 @@
+{
+  "name": "utility-patent-reviewer",
+  "version": "1.0.0",
+  "description": "USPTO MPEP RAG MCP Server - Intelligent patent examination guidance using vector search over the Manual of Patent Examining Procedure",
+  "type": "module",
+  "bin": {
+    "utility-patent-reviewer": "./mcp_server/server.py"
+  },
+  "scripts": {
+    "postinstall": "pip install -r mcp_server/requirements.txt && echo '\n✅ MCP server installed!\n\n📚 Next steps:\n1. Download MPEP PDFs from USPTO\n2. Place PDFs in mcp_server/ directory\n3. Run: python mcp_server/server.py --rebuild-index\n4. Restart Claude Code and use /mcp to verify\n'"
+  },
+  "keywords": [
+    "mcp",
+    "uspto",
+    "mpep",
+    "patent",
+    "rag",
+    "vector-search",
+    "patent-examination",
+    "claude",
+    "ai"
+  ],
+  "author": "RobThePCGuy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RobThePCGuy/utility-patent-reviewer.git"
+  },
+  "engines": {
+    "python": ">=3.10"
+  },
+  "mcp": {
+    "command": "python",
+    "args": [
+      "${PACKAGE_PATH}/mcp_server/server.py"
+    ],
+    "env": {},
+    "timeout": 60000,
+    "description": "Search and analyze USPTO MPEP content for patent examination guidance"
+  }
+}

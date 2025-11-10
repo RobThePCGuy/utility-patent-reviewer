@@ -1,0 +1,14 @@
+# Optional dependencies for enhanced HyDE query expansion and evaluation
+# The system works great without these, but they can improve accuracy further
+
+# For API-based HyDE (best quality)
+anthropic>=0.40.0
+openai>=1.0.0
+
+# For local HyDE model (good quality, offline)
+transformers>=4.44.0
+torch>=2.0.0
+
+# For RAGAS evaluation framework (measure retrieval quality)
+ragas>=0.1.0
+datasets>=2.0.0

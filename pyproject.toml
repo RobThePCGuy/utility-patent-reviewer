@@ -1,0 +1,77 @@
+[project]
+name = "utility-patent-reviewer"
+version = "0.2.0"
+description = "USPTO MPEP RAG MCP Server for patent review with examiner-level accuracy"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "RobThePCGuy", email = "crazypants010@gmail.com"}
+]
+keywords = ["patent", "uspto", "mpep", "mcp", "rag", "ai", "legal"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Legal Industry",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "mcp>=1.21.0",                    # Latest: 1.21.0 (includes FastMCP)
+    "PyMuPDF>=1.26.0",                # Latest: 1.26.6 (Nov 2025)
+    "sentence-transformers>=3.1.0,<4.0.0",   # Compatible: 3.1.0 (works with transformers 4.44)
+    "faiss-cpu>=1.12.0",              # Latest: 1.12.0 (Aug 2025)
+    "numpy>=1.26.0,<2.0.0",           # Compatible: 1.26.4 (works with sentence-transformers 3.1)
+    "rank-bm25>=0.2.2",               # Latest: 0.2.2
+    "beautifulsoup4>=4.14.0",         # Latest: 4.14.2 (Sep 2025)
+    "lxml>=6.0.0",                    # Latest: 6.0.2 (Sep 2025)
+    "requests>=2.32.0",               # Latest: 2.32.5 (Aug 2025)
+    "graphviz>=0.21",                 # Latest: 0.21 (Jun 2025)
+    "pillow>=12.0.0",                 # Latest: 12.0.0 (Oct 2025)
+    "transformers>=4.44.0,<5.0.0",    # Compatible: 4.44.0 (works with sentence-transformers 3.1-3.4)
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+gpu = [
+    # For GPU acceleration (5-10x faster)
+    # Install manually: pip install torch --index-url https://download.pytorch.org/whl/cu124
+    # Optionally: pip install faiss-gpu (replaces faiss-cpu)
+    # Latest PyTorch: 2.9.0 (Oct 2025) with CUDA 12.8 support
+]
+
+[project.scripts]
+patent-reviewer = "mcp_server.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/RobThePCGuy/utility-patent-reviewer"
+Documentation = "https://github.com/RobThePCGuy/utility-patent-reviewer#readme"
+Repository = "https://github.com/RobThePCGuy/utility-patent-reviewer"
+Issues = "https://github.com/RobThePCGuy/utility-patent-reviewer/issues"
+
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["mcp_server"]
+
+[tool.setuptools.package-data]
+mcp_server = ["*.py"]
+
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311', 'py312']
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"

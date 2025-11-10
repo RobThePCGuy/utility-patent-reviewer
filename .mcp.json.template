@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "utility-patent-reviewer": {
+      "command": "/path/to/your/venv/bin/python3",
+      "args": [
+        "/path/to/utility-patent-reviewer/mcp_server/server.py"
+      ],
+      "env": {},
+      "timeout": 60000
+    }
+  }
+}

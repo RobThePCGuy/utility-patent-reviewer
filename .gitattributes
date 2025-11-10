@@ -1,0 +1,111 @@
+# ============================================================================
+# Git Line Ending Configuration
+# Ensures consistent line endings across Windows, Linux, and macOS
+# ============================================================================
+
+# Auto-detect text files and normalize line endings to LF in repository
+* text=auto
+
+# ============================================================================
+# Source Code - Always use LF (Unix-style)
+# ============================================================================
+
+# Python
+*.py text eol=lf
+*.pyx text eol=lf
+*.pxd text eol=lf
+
+# Shell scripts (must be LF for Linux/macOS)
+*.sh text eol=lf
+
+# JSON, YAML, TOML
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+
+# Markdown, reStructuredText
+*.md text eol=lf
+*.rst text eol=lf
+*.txt text eol=lf
+
+# Configuration files
+*.cfg text eol=lf
+*.conf text eol=lf
+*.config text eol=lf
+*.ini text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.editorconfig text eol=lf
+
+# ============================================================================
+# Windows-specific files - Use CRLF
+# ============================================================================
+
+# Windows batch files (must be CRLF for Windows)
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# ============================================================================
+# Binary Files - Never modify
+# ============================================================================
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+
+# Documents
+*.pdf binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+*.tgz binary
+*.rar binary
+*.7z binary
+
+# Compiled files
+*.pyc binary
+*.pyo binary
+*.pyd binary
+*.so binary
+*.dll binary
+*.exe binary
+
+# Database files
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# FAISS index files
+*.faiss binary
+*.pkl binary
+
+# ============================================================================
+# Language-specific
+# ============================================================================
+
+# Python requirements
+requirements*.txt text eol=lf
+**/requirements*.txt text eol=lf
+
+# Setup files
+setup.py text eol=lf
+setup.cfg text eol=lf
+pyproject.toml text eol=lf
+MANIFEST.in text eol=lf
+
+# License
+LICENSE text eol=lf
+LICENSE.* text eol=lf
+
+# Documentation
+README* text eol=lf
+CHANGELOG* text eol=lf
+CONTRIBUTING* text eol=lf

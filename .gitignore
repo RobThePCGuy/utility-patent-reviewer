@@ -1,0 +1,207 @@
+# ============================================================================
+# User-Generated Data (should be created by each user)
+# ============================================================================
+
+# MPEP PDF files (users download their own)
+pdfs/
+*.pdf
+
+# Index files (generated locally)
+mcp_server/index/
+*.faiss
+*.pkl
+mcp_server/mpep_metadata.json
+mcp_server/mpep_bm25.json
+mpep_metadata.json
+mpep_bm25.json
+
+# Patent corpus files (downloaded by users)
+mcp_server/patent_corpus/
+mcp_server/patent_index/
+
+# Generated diagrams (user-created)
+diagrams/
+*.svg
+*.gv
+*.gv.pdf
+*.gv.png
+
+# Evaluation files (generated locally)
+mcp_server/evaluation_results/
+mcp_server/test_dataset.json
+
+# ============================================================================
+# Python
+# ============================================================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.ruff_cache/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Environments
+.env
+.env.local
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# ============================================================================
+# IDE / Editors
+# ============================================================================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# ============================================================================
+# Operating System
+# ============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+.directory
+.Trash-*
+.nfs*
+
+# ============================================================================
+# Project-Specific
+# ============================================================================
+
+# MCP configuration (auto-generated with user-specific paths)
+.mcp.json
+.mcp.local.json
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# Backups
+*.backup
+*.bak
+*.old
+
+# Archives (except distribution files)
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# Compiled files
+*.pyc
+*.pyo
+*.pyd
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Large test files
+test_results/
+benchmark_results/
+
+diagrams/
+*.svg

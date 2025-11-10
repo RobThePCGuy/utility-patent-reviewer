@@ -1,0 +1,60 @@
+# Core MCP and PDF processing
+mcp>=1.21.0                    # Latest: 1.21.0 (includes FastMCP)
+PyMuPDF>=1.26.0                # Latest: 1.26.6 (Nov 2025)
+
+# Vector search and embeddings
+sentence-transformers>=3.1.0,<4.0.0   # Compatible: 3.4.1 (works with transformers 4.44)
+faiss-cpu>=1.12.0              # Latest: 1.12.0 (Aug 2025)
+numpy>=1.26.0,<2.0.0           # Compatible: 1.26.4 (prevents numpy 2.x breaking changes)
+
+# Hybrid search (BM25)
+rank-bm25>=0.2.2               # Latest: 0.2.2
+
+# Web scraping and parsing
+beautifulsoup4>=4.14.0         # Latest: 4.14.2 (Sep 2025)
+lxml>=6.0.0                    # Latest: 6.0.2 (Sep 2025)
+requests>=2.32.0               # Latest: 2.32.5 (Aug 2025)
+
+# Diagram generation
+graphviz>=0.21                 # Latest: 0.21 (Jun 2025)
+pillow>=12.0.0                 # Latest: 12.0.0 (Oct 2025)
+
+# HyDE query expansion
+transformers>=4.44.0,<5.0.0    # Compatible: 4.44.0 (works with sentence-transformers 3.1)
+
+# ========================================
+# GPU ACCELERATION SETUP (AUTOMATIC)
+# ========================================
+# The install.py script automatically detects your GPU and installs
+# the correct PyTorch version. Just run: python install.py
+#
+# For RTX 5090/5080 (Compute 12.0+): Installs PyTorch with CUDA 12.8
+# For older NVIDIA GPUs: Installs PyTorch with CUDA 12.8
+# For no GPU: Installs CPU-only PyTorch
+#
+# Manual installation (if needed):
+#
+# 1. CHECK CURRENT STATUS:
+#    python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
+#
+# 2. INSTALL CUDA-ENABLED PYTORCH:
+#    pip uninstall torch torchaudio torchvision
+#    pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+#
+# 3. VERIFY GPU IS DETECTED:
+#    python test_install.py
+#
+# Performance with GPU acceleration:
+#   - Embedding generation: 10x faster
+#   - Index building (MPEP): 5x faster  
+#   - Index building (Patents): 6-7x faster
+#
+# Note: FAISS-GPU is Linux-only. Windows uses faiss-cpu but still benefits
+#       from PyTorch GPU acceleration for embedding generation.
+#
+# Compatible versions (tested and working):
+#   PyTorch: 2.9.0+cu128
+#   Transformers: 4.44.0
+#   Sentence Transformers: 3.1.0
+#   NumPy: 1.26.4
+#   FAISS-CPU: 1.12.0
