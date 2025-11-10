@@ -1,0 +1,141 @@
+# Code Owners for Utility Patent Reviewer
+#
+# This file defines individuals or teams responsible for code in this repository.
+# When a pull request modifies files with a code owner, that owner is automatically
+# requested for review.
+#
+# Format: path/to/files @github-username @github-team
+# More specific paths take precedence over less specific ones
+
+# ============================================================================
+# Global Owners
+# ============================================================================
+
+# Default owner for everything unless a more specific rule matches
+* @RobThePCGuy
+
+# ============================================================================
+# Core Code
+# ============================================================================
+
+# MCP Server implementation
+/mcp_server/ @RobThePCGuy
+/mcp_server/server.py @RobThePCGuy
+/mcp_server/mpep_rag.py @RobThePCGuy
+/mcp_server/patent_search.py @RobThePCGuy
+
+# Installation and setup
+/install.py @RobThePCGuy
+/test_install.py @RobThePCGuy
+
+# ============================================================================
+# Configuration Files
+# ============================================================================
+
+# Claude Code configuration
+/.claude/ @RobThePCGuy
+/.claude/skills/ @RobThePCGuy
+/.claude/commands/ @RobThePCGuy
+
+# MCP configuration
+.mcp.json.template @RobThePCGuy
+
+# Python package configuration
+/package.json @RobThePCGuy
+/pyproject.toml @RobThePCGuy
+/setup.py @RobThePCGuy
+
+# ============================================================================
+# Documentation
+# ============================================================================
+
+# Main documentation files
+/README.md @RobThePCGuy
+/ADVANCED-README.md @RobThePCGuy
+/CONTRIBUTING.md @RobThePCGuy
+/LICENSE @RobThePCGuy
+/SECURITY.md @RobThePCGuy
+
+# Documentation directory
+/docs/ @RobThePCGuy
+/docs/*.md @RobThePCGuy
+
+# API documentation
+/docs/USPTO_API_SETUP.md @RobThePCGuy
+/docs/PATENTSVIEW_API_SETUP.md @RobThePCGuy
+/docs/PATENTSVIEW_DATA_ACCESS.md @RobThePCGuy
+
+# ============================================================================
+# GitHub Configuration
+# ============================================================================
+
+# GitHub templates and workflows
+/.github/ @RobThePCGuy
+/.github/workflows/ @RobThePCGuy
+/.github/ISSUE_TEMPLATE/ @RobThePCGuy
+/.github/pull_request_template.md @RobThePCGuy
+/.github/CODEOWNERS @RobThePCGuy
+
+# ============================================================================
+# Dependencies
+# ============================================================================
+
+# Python requirements
+/requirements.txt @RobThePCGuy
+/mcp_server/requirements.txt @RobThePCGuy
+
+# ============================================================================
+# Tests
+# ============================================================================
+
+# Test files
+/tests/ @RobThePCGuy
+/test_*.py @RobThePCGuy
+**/test_*.py @RobThePCGuy
+
+# ============================================================================
+# Infrastructure & Configuration
+# ============================================================================
+
+# Git configuration
+.gitignore @RobThePCGuy
+.gitattributes @RobThePCGuy
+
+# Python configuration
+.python-version @RobThePCGuy
+
+# ============================================================================
+# Specific Expertise Areas (Add as team grows)
+# ============================================================================
+
+# Patent law and USPTO compliance
+# Future: Add patent law experts
+# /.claude/skills/patent-reviewer/ @RobThePCGuy @patent-law-expert
+
+# Vector search and embeddings
+# Future: Add ML/NLP experts
+# /mcp_server/mpep_rag.py @RobThePCGuy @ml-expert
+# /mcp_server/patent_search.py @RobThePCGuy @ml-expert
+
+# API integrations
+# Future: Add API specialists
+# /mcp_server/uspto_api.py @RobThePCGuy @api-expert
+# /mcp_server/patentsview_api.py @RobThePCGuy @api-expert
+
+# ============================================================================
+# Notes
+# ============================================================================
+#
+# How to use this file:
+#
+# 1. Code owners are automatically requested for review when PRs touch their files
+# 2. More specific patterns override general ones
+# 3. You can specify multiple owners per pattern
+# 4. Use @username for individuals, @org/team for teams
+# 5. Empty lines and comments (starting with #) are ignored
+#
+# As the team grows, add new owners in the specific expertise areas section.
+# This ensures proper review coverage for specialized components.
+#
+# For more information:
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners

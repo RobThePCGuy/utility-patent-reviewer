@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: GitHub Discussions
+    url: https://github.com/RobThePCGuy/utility-patent-reviewer/discussions
+    about: Ask questions, share ideas, and discuss with the community
+  - name: Documentation
+    url: https://github.com/RobThePCGuy/utility-patent-reviewer/blob/master/README.md
+    about: Read the complete documentation and setup guide
+  - name: Advanced Documentation
+    url: https://github.com/RobThePCGuy/utility-patent-reviewer/blob/master/ADVANCED-README.md
+    about: Technical documentation, API reference, and development guide
