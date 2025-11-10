@@ -287,7 +287,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest pytest-cov
-        pip install -r mcp_server/requirements.txt || echo "No requirements.txt"
+        if [ -f mcp_server/requirements.txt ]; then pip install -r mcp_server/requirements.txt; else echo "No requirements.txt"; fi
 
     - name: Run tests
       run: |
