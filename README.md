@@ -2,6 +2,18 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Cross-Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/RobThePCGuy/utility-patent-reviewer)
 
+## Vision
+
+I have a dream... of a world where inventors can transform their ideas into patent-ready applications without navigating complex legal interfaces or paying prohibitive upfront costs. By combining Claude's reasoning capabilities with patent examination standards, I hope to bridge the gap between invention and protection by turning rough notes, drawings, and concepts into structured, examination-ready patent applications through natural conversation rather than specialized legal expertise.
+
+This HEAVY work-in-progress platform will illuminate the patent landscape, helping inventors understand prior art and competitive positioning before they invest time and resources, enabling smarter strategic decisions about what and how to protect. In turn, it will educate through the drafting process, transparently applying USPTO standards (MPEP) to provide constructive feedback that teaches inventors what examiners look for, without crossing into legal advice.
+
+The system will deliver examination-ready quality by producing 80-90% complete applications that are properly structured, internally consistent, and aligned with formal requirements, ready for final attorney review and filing.
+
+My North Star: An inventor should be able to have a conversation about their idea and walk away with either a patent draft ready for attorney review or clear guidance on how to refine their innovation to be more defensible, all without needing to first become a patent expert themselves.
+
+I want to emphasize that this tool will not replace patent attorneys; I want to make their expertise more accessible and enable inventors to arrive at that conversation better prepared and more informed.
+
 # Utility Patent Reviewer
 
 **Talk to Claude about your invention. Get patent-ready documentation.**
