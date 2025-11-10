@@ -272,7 +272,7 @@ except Exception as e:
 # Bad - catch-all without context
 try:
     result = risky_operation()
-except:
+except Exception:
     pass
 ```
 
