@@ -354,10 +354,10 @@ jobs:
   assign:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/auto-assign@v1
+      - uses: kentaro-m/auto-assign-action@v1
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          add-assignees: RobThePCGuy
+          assignees: |
+            - RobThePCGuy
 ```
 
 ---
