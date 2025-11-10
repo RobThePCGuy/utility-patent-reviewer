@@ -202,7 +202,9 @@ ruff check --fix .
 Use type hints for function signatures:
 
 ```python
-def search_mpep(query: str, top_k: int = 5) -> list[dict]:
+from typing import List, Dict, Any
+
+def search_mpep(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
     """Search MPEP content for relevant passages.
 
     Args:
