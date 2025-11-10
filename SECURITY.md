@@ -402,8 +402,6 @@ We would like to thank the following individuals for responsibly disclosing secu
 
 For security-related questions (not vulnerabilities), you can:
 - Open a Discussion on GitHub (for general security questions)
-- Email (for sensitive but non-urgent matters)
-
 For actual vulnerabilities, please use the reporting process above.
 
 ---
