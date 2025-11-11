@@ -4,7 +4,7 @@ import json
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import numpy as np
 
@@ -70,8 +70,8 @@ class HybridRAGIndex(ABC):
                 self.use_hyde = False
 
         # Storage
-        self.chunks: List[str] = []
-        self.metadata: List[Dict[str, Any]] = []
+        self.chunks: list[str] = []
+        self.metadata: list[dict[str, Any]] = []
         self.index: Optional[faiss.Index] = None
         self.bm25: Optional[BM25Okapi] = None
 
@@ -86,7 +86,7 @@ class HybridRAGIndex(ABC):
         pass
 
     @abstractmethod
-    def _get_index_files(self) -> Dict[str, Path]:
+    def _get_index_files(self) -> dict[str, Path]:
         """Return paths for index files
 
         Returns:
@@ -139,7 +139,7 @@ class HybridRAGIndex(ABC):
         print(f"FAISS index saved to {files['faiss']}", file=sys.stderr)
 
         # Save metadata
-        with open(files["metadata"], "w") as f:
+        with files["metadata"].open("w") as f:
             json.dump(self.metadata, f)
         print(f"Metadata saved to {files['metadata']}", file=sys.stderr)
 
@@ -147,7 +147,7 @@ class HybridRAGIndex(ABC):
         if self.bm25:
             import pickle
 
-            with open(files["bm25"], "wb") as f:
+            with files["bm25"].open("wb") as f:
                 pickle.dump(self.bm25, f)
             print(f"BM25 index saved to {files['bm25']}", file=sys.stderr)
 
@@ -167,7 +167,7 @@ class HybridRAGIndex(ABC):
             self.index = faiss.read_index(str(files["faiss"]))
 
             # Load metadata
-            with open(files["metadata"], "r") as f:
+            with files["metadata"].open() as f:
                 self.metadata = json.load(f)
 
             # Rebuild chunks from metadata
@@ -179,7 +179,7 @@ class HybridRAGIndex(ABC):
 
                 # Note: pickle is only used for locally-generated index files (trusted source)
                 # These files are created by this application and stored in the local file system
-                with open(files["bm25"], "rb") as f:
+                with files["bm25"].open("rb") as f:
                     self.bm25 = pickle.load(f)  # nosec B301 - loading trusted local index
 
             print(f"Index loaded: {len(self.chunks)} chunks", file=sys.stderr)
@@ -191,7 +191,7 @@ class HybridRAGIndex(ABC):
 
     def _hybrid_search(
         self, query: str, retrieve_k: int, apply_hyde: bool = True
-    ) -> Dict[int, Dict[str, Any]]:
+    ) -> dict[int, dict[str, Any]]:
         """Perform hybrid search with FAISS + BM25 + optional HyDE
 
         Args:
@@ -277,8 +277,8 @@ class HybridRAGIndex(ABC):
         return candidates
 
     def _rerank_candidates(
-        self, query: str, candidates: Dict[int, Dict[str, Any]], top_k: int
-    ) -> List[Dict[str, Any]]:
+        self, query: str, candidates: dict[int, dict[str, Any]], top_k: int
+    ) -> list[dict[str, Any]]:
         """Rerank candidates using cross-encoder
 
         Args:
@@ -302,7 +302,7 @@ class HybridRAGIndex(ABC):
 
         # Combine scores and return top_k
         results = []
-        for (idx, cand), rerank_score in zip(rerank_candidates, rerank_scores):
+        for (_idx, cand), rerank_score in zip(rerank_candidates, rerank_scores):
             results.append(
                 {
                     **cand,

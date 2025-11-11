@@ -15,10 +15,10 @@ import json
 import os
 import sys
 import time
-from typing import Dict, List, Optional, Any
+from typing import Any, Optional
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlparse
 from urllib.request import Request, urlopen
-from urllib.error import HTTPError, URLError
 
 
 class PatentsViewAPI:
@@ -66,12 +66,12 @@ class PatentsViewAPI:
 
     def search(
         self,
-        query: Dict[str, Any],
-        fields: Optional[List[str]] = None,
-        sort: Optional[List[Dict[str, str]]] = None,
-        options: Optional[Dict[str, Any]] = None,
+        query: dict[str, Any],
+        fields: Optional[list[str]] = None,
+        sort: Optional[list[dict[str, str]]] = None,
+        options: Optional[dict[str, Any]] = None,
         method: str = "POST",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Execute a patent search query.
 
@@ -102,8 +102,10 @@ class PatentsViewAPI:
         try:
             # Validate URL scheme for security (only allow HTTPS for API calls)
             parsed_base = urlparse(self.BASE_URL)
-            if parsed_base.scheme != 'https':
-                raise ValueError(f"Invalid URL scheme: {parsed_base.scheme}. Only HTTPS is allowed for API calls.")
+            if parsed_base.scheme != "https":
+                raise ValueError(
+                    f"Invalid URL scheme: {parsed_base.scheme}. Only HTTPS is allowed for API calls."
+                )
 
             if method == "POST":
                 req = Request(
@@ -138,7 +140,7 @@ class PatentsViewAPI:
         limit: int = 100,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Search patents by title keywords.
 
@@ -176,7 +178,7 @@ class PatentsViewAPI:
 
     def search_by_inventor(
         self, last_name: str, first_name: Optional[str] = None, limit: int = 100
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Search patents by inventor name.
 
@@ -209,7 +211,7 @@ class PatentsViewAPI:
 
     def search_by_assignee(
         self, assignee: str, limit: int = 100, start_date: Optional[str] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Search patents by assignee (company/organization).
 
@@ -236,7 +238,7 @@ class PatentsViewAPI:
 
     def search_prior_art(
         self, keywords: str, before_date: str, limit: int = 100, search_abstract: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Search for prior art before a specific date.
 
@@ -280,11 +282,11 @@ class PatentsViewAPI:
 
     def get_all_pages(
         self,
-        query: Dict[str, Any],
-        fields: Optional[List[str]] = None,
-        sort: Optional[List[Dict[str, str]]] = None,
+        query: dict[str, Any],
+        fields: Optional[list[str]] = None,
+        sort: Optional[list[dict[str, str]]] = None,
         max_results: int = 1000,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Retrieve all pages of results up to max_results.
 
@@ -337,7 +339,7 @@ class PatentsViewAPI:
         return all_patents[:max_results]
 
 
-def format_patent(patent: Dict[str, Any]) -> str:
+def format_patent(patent: dict[str, Any]) -> str:
     """Format a patent record for display."""
     lines = []
     lines.append(f"Patent ID: US{patent.get('patent_id', 'N/A')}")

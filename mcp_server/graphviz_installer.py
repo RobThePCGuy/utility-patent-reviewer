@@ -8,7 +8,7 @@ import platform
 import shutil
 import subprocess
 import sys
-from typing import Any, Dict, Tuple
+from typing import Any
 
 
 class GraphvizInstaller:
@@ -18,7 +18,7 @@ class GraphvizInstaller:
         self.system = platform.system()
         self.status = self.check_installation()
 
-    def check_installation(self) -> Dict[str, Any]:
+    def check_installation(self) -> dict[str, Any]:
         """
         Check if Graphviz is properly installed
 
@@ -129,7 +129,7 @@ class GraphvizInstaller:
 
         return "\n".join(instructions)
 
-    def try_auto_install(self) -> Tuple[bool, str]:
+    def try_auto_install(self) -> tuple[bool, str]:
         """
         Attempt automatic installation (requires elevated privileges)
 
@@ -256,7 +256,7 @@ class GraphvizInstaller:
         return "\n".join(lines)
 
 
-def ensure_graphviz() -> Tuple[bool, str]:
+def ensure_graphviz() -> tuple[bool, str]:
     """
     Ensure Graphviz is installed and ready
 

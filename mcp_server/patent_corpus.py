@@ -9,7 +9,7 @@ import sys
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import requests
 
@@ -31,15 +31,15 @@ class Patent:
     patent_id: str
     title: str
     abstract: str
-    claims: List[str]
+    claims: list[str]
     description: str
-    cpc_codes: List[str]
+    cpc_codes: list[str]
     filing_date: Optional[str]
     grant_date: Optional[str]
-    inventors: List[str]
+    inventors: list[str]
     assignee: Optional[str]
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization"""
         return {
             "patent_id": self.patent_id,
@@ -63,13 +63,13 @@ class PatentTSVParser:
         self.corpus_dir.mkdir(parents=True, exist_ok=True)
 
         # Cache for loaded data (to avoid re-reading large files)
-        self._abstracts: Dict[str, str] = {}
-        self._claims: Dict[str, List[str]] = {}
-        self._descriptions: Dict[str, str] = {}
-        self._inventors: Dict[str, List[str]] = {}
-        self._assignees: Dict[str, str] = {}
-        self._cpc_codes: Dict[str, List[str]] = {}
-        self._applications: Dict[str, str] = {}
+        self._abstracts: dict[str, str] = {}
+        self._claims: dict[str, list[str]] = {}
+        self._descriptions: dict[str, str] = {}
+        self._inventors: dict[str, list[str]] = {}
+        self._assignees: dict[str, str] = {}
+        self._cpc_codes: dict[str, list[str]] = {}
+        self._applications: dict[str, str] = {}
 
     def load_data_files(self, force_reload: bool = False):
         """
@@ -158,11 +158,11 @@ class PatentTSVParser:
 
         print("All data files loaded", file=sys.stderr)
 
-    def _load_key_value_file(self, file_path: Path, key_col: str, value_col: str) -> Dict[str, str]:
+    def _load_key_value_file(self, file_path: Path, key_col: str, value_col: str) -> dict[str, str]:
         """Load a TSV file into a key-value dictionary"""
         result = {}
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with file_path.open(encoding="utf-8", errors="ignore") as f:
                 reader = csv.DictReader(f, delimiter="\t", quoting=csv.QUOTE_MINIMAL)
                 for row in reader:
                     key = row.get(key_col, "").strip()
@@ -179,11 +179,11 @@ class PatentTSVParser:
         key_col: str,
         value_col: str,
         sort_col: Optional[str] = None,
-    ) -> Dict[str, List[str]]:
+    ) -> dict[str, list[str]]:
         """Load a TSV file with multiple rows per key"""
         result = {}
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with file_path.open(encoding="utf-8", errors="ignore") as f:
                 reader = csv.DictReader(f, delimiter="\t", quoting=csv.QUOTE_MINIMAL)
 
                 # Collect all rows
@@ -216,11 +216,11 @@ class PatentTSVParser:
         first_col: str,
         last_col: str,
         sort_col: Optional[str] = None,
-    ) -> Dict[str, List[str]]:
+    ) -> dict[str, list[str]]:
         """Load names from TSV file (first + last)"""
         result = {}
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with file_path.open(encoding="utf-8", errors="ignore") as f:
                 reader = csv.DictReader(f, delimiter="\t", quoting=csv.QUOTE_MINIMAL)
 
                 rows = []
@@ -248,11 +248,11 @@ class PatentTSVParser:
             print(f"Error loading {file_path}: {e}", file=sys.stderr)
         return result
 
-    def _load_first_assignee(self, file_path: Path) -> Dict[str, str]:
+    def _load_first_assignee(self, file_path: Path) -> dict[str, str]:
         """Load first assignee for each patent"""
         result = {}
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with file_path.open(encoding="utf-8", errors="ignore") as f:
                 reader = csv.DictReader(f, delimiter="\t", quoting=csv.QUOTE_MINIMAL)
 
                 for row in reader:
@@ -275,11 +275,11 @@ class PatentTSVParser:
             print(f"Error loading {file_path}: {e}", file=sys.stderr)
         return result
 
-    def _load_cpc_codes(self, file_path: Path) -> Dict[str, List[str]]:
+    def _load_cpc_codes(self, file_path: Path) -> dict[str, list[str]]:
         """Load CPC codes"""
         result = {}
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with file_path.open(encoding="utf-8", errors="ignore") as f:
                 reader = csv.DictReader(f, delimiter="\t", quoting=csv.QUOTE_MINIMAL)
 
                 for row in reader:
@@ -305,7 +305,7 @@ class PatentTSVParser:
             print(f"Error loading {file_path}: {e}", file=sys.stderr)
         return result
 
-    def parse_main_file(self, max_patents: Optional[int] = None) -> List[Patent]:
+    def parse_main_file(self, max_patents: Optional[int] = None) -> list[Patent]:
         """
         Parse main patent file (g_patent.tsv) and join with other data
 
@@ -328,7 +328,7 @@ class PatentTSVParser:
         print(f"Parsing main patent file: {main_file}", file=sys.stderr)
 
         try:
-            with open(main_file, "r", encoding="utf-8", errors="ignore") as f:
+            with main_file.open(encoding="utf-8", errors="ignore") as f:
                 reader = csv.DictReader(f, delimiter="\t", quoting=csv.QUOTE_MINIMAL)
 
                 for i, row in enumerate(reader):
@@ -438,7 +438,7 @@ class PatentCorpusDownloader:
 
                 # Download with progress
                 downloaded = 0
-                with open(zip_path, "wb") as f:
+                with zip_path.open("wb") as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)
@@ -565,7 +565,7 @@ class PatentCorpusDownloader:
         )
         return True
 
-    def get_downloaded_files(self) -> List[Path]:
+    def get_downloaded_files(self) -> list[Path]:
         """Get list of downloaded TSV files"""
         files = []
         if self.corpus_dir.exists():
@@ -574,7 +574,7 @@ class PatentCorpusDownloader:
         return files
 
 
-def check_patent_corpus_status() -> Dict[str, Any]:
+def check_patent_corpus_status() -> dict[str, Any]:
     """Check status of downloaded patent corpus"""
     downloader = PatentCorpusDownloader()
     files = downloader.get_downloaded_files()

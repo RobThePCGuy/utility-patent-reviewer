@@ -5,17 +5,14 @@ Provides intelligent retrieval from the Manual of Patent Examining Procedure
 """
 
 import json
-import os
 
 # CRITICAL: Disable user site-packages BEFORE importing third-party packages
 # This prevents conflicts with global user installations
 import site
-import socket
 import sys
-import urllib.request
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Import health check system for startup validation
 try:
@@ -77,7 +74,6 @@ except ImportError:
 try:
     import faiss
     import numpy as np
-    import torch
     from sentence_transformers import CrossEncoder, SentenceTransformer
 except ImportError:
     print(
@@ -223,7 +219,7 @@ def download_subsequent_publications(dest_dir: Path = MPEP_DIR) -> bool:
     )
 
 
-def check_all_sources(dest_dir: Path = MPEP_DIR) -> Dict[str, bool]:
+def check_all_sources(dest_dir: Path = MPEP_DIR) -> dict[str, bool]:
     """Check which source documents are available"""
     return {
         "mpep": check_mpep_pdfs(dest_dir) > 0,
@@ -269,7 +265,7 @@ class MPEPIndex:
         self.metadata_file = INDEX_DIR / "mpep_metadata.json"
         self.bm25_file = INDEX_DIR / "mpep_bm25.json"
 
-    def extract_text_from_pdf(self, pdf_path: Path) -> List[Dict[str, Any]]:
+    def extract_text_from_pdf(self, pdf_path: Path) -> list[dict[str, Any]]:
         """Extract text from PDF with contextual metadata"""
         chunks = []
         doc = None
@@ -318,11 +314,11 @@ class MPEPIndex:
         self,
         text: str,
         section_label: str,
-        base_metadata: Dict[str, Any],
+        base_metadata: dict[str, Any],
         chunk_size: int = 500,
         overlap: int = 100,
         min_chunk_length: int = 50,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Common helper to chunk text and attach metadata with cross-reference detection.
 
@@ -368,7 +364,7 @@ class MPEPIndex:
 
         return chunks
 
-    def extract_text_from_usc(self, pdf_path: Path) -> List[Dict[str, Any]]:
+    def extract_text_from_usc(self, pdf_path: Path) -> list[dict[str, Any]]:
         """Extract text from 35 USC PDF with statute section detection"""
         import re
 
@@ -416,7 +412,7 @@ class MPEPIndex:
                 doc.close()
         return chunks
 
-    def extract_text_from_cfr(self, pdf_path: Path) -> List[Dict[str, Any]]:
+    def extract_text_from_cfr(self, pdf_path: Path) -> list[dict[str, Any]]:
         """Extract text from 37 CFR PDF with rule section detection"""
         import re
 
@@ -470,7 +466,7 @@ class MPEPIndex:
                 doc.close()
         return chunks
 
-    def extract_text_from_subsequent_pubs(self, pdf_path: Path) -> List[Dict[str, Any]]:
+    def extract_text_from_subsequent_pubs(self, pdf_path: Path) -> list[dict[str, Any]]:
         """Extract text from Subsequent Publications PDF with update tracking"""
         import re
 
@@ -594,7 +590,7 @@ class MPEPIndex:
         if not force_rebuild and self.index_file.exists() and self.metadata_file.exists():
             # Load existing index
             self.index = faiss.read_index(str(self.index_file))
-            with open(self.metadata_file, "r", encoding="utf-8") as f:
+            with self.metadata_file.open(encoding="utf-8") as f:
                 data = json.load(f)
                 self.chunks = data["chunks"]
                 self.metadata = data["metadata"]
@@ -607,7 +603,7 @@ class MPEPIndex:
 
                     print("Loading BM25 index from disk...", file=sys.stderr)
                     # Note: pickle is only used for locally-generated index files (trusted source)
-                    with open(self.bm25_file, "rb") as f:
+                    with self.bm25_file.open("rb") as f:
                         self.bm25 = pickle.load(f)  # nosec B301 - loading trusted local index
                     print("Hybrid search enabled", file=sys.stderr)
                 except Exception as e:
@@ -742,13 +738,13 @@ class MPEPIndex:
             tokenized = [chunk.lower().split() for chunk in texts]
             self.bm25 = BM25Okapi(tokenized)
             # Persist BM25 index to disk
-            with open(self.bm25_file, "wb") as f:
+            with self.bm25_file.open("wb") as f:
                 pickle.dump(self.bm25, f)
             print("Hybrid search enabled", file=sys.stderr)
 
         # Save index
         faiss.write_index(self.index, str(self.index_file))
-        with open(self.metadata_file, "w", encoding="utf-8") as f:
+        with self.metadata_file.open("w", encoding="utf-8") as f:
             json.dump({"chunks": self.chunks, "metadata": self.metadata}, f)
 
         print(f"Index built and saved with {len(self.chunks)} chunks", file=sys.stderr)
@@ -765,7 +761,7 @@ class MPEPIndex:
         is_statute: Optional[bool] = None,
         is_regulation: Optional[bool] = None,
         is_update: Optional[bool] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Advanced hybrid search with HyDE expansion and reranking
 
         Args:
@@ -780,10 +776,7 @@ class MPEPIndex:
         if self.index is None:
             raise ValueError("Index not built. Call build_index() first.")
 
-        if retrieve_k is None:
-            retrieve_k = min(top_k * 4, 50)
-        else:
-            retrieve_k = min(retrieve_k, 100)  # Cap at 100 for performance
+        retrieve_k = min(top_k * 4, 50) if retrieve_k is None else min(retrieve_k, 100)  # Cap at 100 for performance
         candidates = {}
 
         # HyDE Query Expansion (if enabled)
@@ -892,7 +885,7 @@ class MPEPIndex:
 
         # Combine rerank scores with candidates
         final_results = []
-        for (idx, cand), rerank_score in zip(sorted_candidates, rerank_scores):
+        for (_idx, cand), rerank_score in zip(sorted_candidates, rerank_scores):
             final_results.append(
                 {
                     "text": cand["text"],
@@ -921,7 +914,7 @@ def search_mpep(
     is_statute: Optional[bool] = None,
     is_regulation: Optional[bool] = None,
     is_update: Optional[bool] = None,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Search USPTO MPEP manual for relevant information.
 
     Hybrid search (FAISS + BM25) with optional filters for source type (MPEP/35_USC/37_CFR/SUBSEQUENT),
@@ -969,7 +962,7 @@ def search_mpep(
 
 
 @mcp.tool()
-def get_mpep_section(section_number: str, max_chunks: int = 50) -> Dict[str, Any]:
+def get_mpep_section(section_number: str, max_chunks: int = 50) -> dict[str, Any]:
     """Get all text chunks from a specific MPEP section number (e.g., "2100", "700", "608")."""
     # Find all chunks from the specified section
     section_pattern = f"MPEP {section_number}"
@@ -991,7 +984,7 @@ def get_mpep_section(section_number: str, max_chunks: int = 50) -> Dict[str, Any
 
 
 @mcp.tool()
-def review_patent_claims(claims_text: str) -> Dict[str, Any]:
+def review_patent_claims(claims_text: str) -> dict[str, Any]:
     """Analyze patent claims for 35 USC 112(b) compliance: antecedent basis, definiteness, subjective terms, cross-references, and structure."""
 
     # Run automated analysis
@@ -1053,7 +1046,7 @@ def review_patent_claims(claims_text: str) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def review_specification(claims_text: str, specification: str) -> Dict[str, Any]:
+def review_specification(claims_text: str, specification: str) -> dict[str, Any]:
     """Analyze specification support for claims per 35 USC 112(a): written description, enablement, and best mode."""
 
     # Run automated analysis
@@ -1128,7 +1121,7 @@ def check_formalities(
     title: Optional[str] = None,
     specification: Optional[str] = None,
     drawings_present: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Check patent application formalities per MPEP 608: abstract (50-150 words), title (≤500 chars), required sections, and drawing references."""
 
     # Run automated analysis
@@ -1220,7 +1213,7 @@ def search_uspto_api(
     end_year: Optional[int] = None,
     application_type: Optional[str] = None,
     status: Optional[str] = None,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Search USPTO Open Data Portal API (live database). Requires USPTO_API_KEY environment variable. Supports year range and application type filters."""
     try:
         client = _ensure_uspto_client()
@@ -1272,7 +1265,7 @@ def search_uspto_api(
 
 
 @mcp.tool()
-def get_uspto_patent(patent_number: str) -> Dict[str, Any]:
+def get_uspto_patent(patent_number: str) -> dict[str, Any]:
     """Get detailed patent information from USPTO API by patent number (e.g., "11234567" or "US11234567")."""
     try:
         client = _ensure_uspto_client()
@@ -1315,7 +1308,7 @@ def get_uspto_patent(patent_number: str) -> Dict[str, Any]:
 @mcp.tool()
 def get_recent_uspto_patents(
     days: int = 7, application_type: str = "Utility", limit: int = 100
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Get recently granted patents from USPTO API. Default: last 7 days of utility patents."""
     try:
         client = _ensure_uspto_client()
@@ -1357,7 +1350,7 @@ def get_recent_uspto_patents(
 
 
 @mcp.tool()
-def check_uspto_api_status() -> Dict[str, Any]:
+def check_uspto_api_status() -> dict[str, Any]:
     """Check USPTO API accessibility and API key validity."""
     try:
         client = _ensure_uspto_client()
@@ -1421,7 +1414,7 @@ def search_prior_art(
     retrieve_k: Optional[int] = None,
     cpc_filter: Optional[str] = None,
     years_back: Optional[int] = None,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Search local patent corpus for prior art. Supports CPC code filters (e.g., "G06F") and year range limits."""
     try:
         index = _ensure_patent_index()
@@ -1453,7 +1446,7 @@ def search_prior_art(
 
 
 @mcp.tool()
-def get_patent_details(patent_id: str) -> Dict[str, Any]:
+def get_patent_details(patent_id: str) -> dict[str, Any]:
     """Get complete patent information with all text chunks by patent number (e.g., "10123456" or "US10123456")."""
     try:
         index = _ensure_patent_index()
@@ -1492,7 +1485,7 @@ def get_patent_details(patent_id: str) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def check_patent_corpus_status() -> Dict[str, Any]:
+def check_patent_corpus_status() -> dict[str, Any]:
     """Check status of patent corpus download and search index."""
     try:
         from mcp_server.patent_corpus import check_patent_corpus_status as check_status
@@ -1511,7 +1504,7 @@ def render_diagram(
     filename: str = "diagram",
     output_format: str = "svg",
     engine: str = "dot",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Render a technical diagram from Graphviz DOT code.
 
@@ -1572,8 +1565,8 @@ def render_diagram(
 
 @mcp.tool()
 def create_flowchart(
-    steps: List[Dict[str, Any]], filename: str = "flowchart", output_format: str = "svg"
-) -> Dict[str, Any]:
+    steps: list[dict[str, Any]], filename: str = "flowchart", output_format: str = "svg"
+) -> dict[str, Any]:
     """
     Create a patent-style flowchart from a list of steps.
 
@@ -1630,11 +1623,11 @@ def create_flowchart(
 
 @mcp.tool()
 def create_block_diagram(
-    blocks: List[Dict[str, Any]],
-    connections: List[List[str]],
+    blocks: list[dict[str, Any]],
+    connections: list[list[str]],
     filename: str = "block_diagram",
     output_format: str = "svg",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Create a patent-style block diagram showing system components and connections.
 
@@ -1676,9 +1669,8 @@ def create_block_diagram(
             }
 
         # Convert connections to tuples with proper typing
-        from typing import Tuple
 
-        connections_tuples: List[Tuple[str, str, Optional[str]]] = [
+        connections_tuples: list[tuple[str, str, Optional[str]]] = [
             (conn[0], conn[1], conn[2] if len(conn) > 2 else None) for conn in connections
         ]
 
@@ -1704,7 +1696,7 @@ def create_block_diagram(
 
 
 @mcp.tool()
-def add_diagram_references(svg_path: str, reference_map: Dict[str, int]) -> Dict[str, Any]:
+def add_diagram_references(svg_path: str, reference_map: dict[str, int]) -> dict[str, Any]:
     """
     Add patent-style reference numbers to an existing SVG diagram.
 
@@ -1745,7 +1737,7 @@ def add_diagram_references(svg_path: str, reference_map: Dict[str, int]) -> Dict
 
 
 @mcp.tool()
-def get_diagram_templates() -> Dict[str, Any]:
+def get_diagram_templates() -> dict[str, Any]:
     """
     Get common patent diagram templates in DOT language.
 
@@ -1776,7 +1768,7 @@ def get_diagram_templates() -> Dict[str, Any]:
 
 
 @mcp.tool()
-def check_diagram_tools_status() -> Dict[str, Any]:
+def check_diagram_tools_status() -> dict[str, Any]:
     """
     Check if diagram generation tools are installed and ready.
 
@@ -1810,7 +1802,7 @@ def get_index_stats() -> str:
         "total_chunks": len(mpep_index.chunks),
         "total_metadata": len(mpep_index.metadata),
         "index_exists": mpep_index.index is not None,
-        "sections": len(set(m["section"] for m in mpep_index.metadata)),
+        "sections": len({m["section"] for m in mpep_index.metadata}),
     }
     return json.dumps(stats, indent=2)
 

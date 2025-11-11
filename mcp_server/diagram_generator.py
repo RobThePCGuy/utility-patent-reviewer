@@ -6,15 +6,15 @@ Renders technical diagrams from DOT code with patent-style annotations
 
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 # Use defusedxml for secure XML parsing (prevents XML bombs and XXE attacks)
 try:
-    import defusedxml.ElementTree as ET
+    import defusedxml.ElementTree as ElementTree
 except ImportError:
     # Fallback to standard library if defusedxml not available
     # Note: This is less secure and should only be used for trusted, locally-generated files
-    import xml.etree.ElementTree as ET
+    import xml.etree.ElementTree as ElementTree
 
 try:
     import graphviz
@@ -101,7 +101,7 @@ class PatentDiagramGenerator:
 
     def create_flowchart(
         self,
-        steps: List[Dict[str, str]],
+        steps: list[dict[str, str]],
         filename: str = "flowchart",
         output_format: str = "svg",
     ) -> Path:
@@ -160,8 +160,8 @@ class PatentDiagramGenerator:
 
     def create_block_diagram(
         self,
-        blocks: List[Dict[str, Any]],
-        connections: List[Tuple[str, str, Optional[str]]],
+        blocks: list[dict[str, Any]],
+        connections: list[tuple[str, str, Optional[str]]],
         filename: str = "block_diagram",
         output_format: str = "svg",
     ) -> Path:
@@ -234,7 +234,7 @@ class PatentDiagramGenerator:
 
         return self.render_dot_diagram(dot_code, filename, output_format)
 
-    def add_reference_numbers(self, svg_path: Path, reference_map: Dict[str, int]) -> Path:
+    def add_reference_numbers(self, svg_path: Path, reference_map: dict[str, int]) -> Path:
         """
         Add patent-style reference numbers to an SVG diagram
 
@@ -255,7 +255,7 @@ class PatentDiagramGenerator:
         # Parse SVG
         # Note: This parses locally-generated SVG from graphviz (trusted source)
         # defusedxml is used when available for defense-in-depth
-        tree = ET.parse(svg_path)  # nosec B314 - parsing trusted local graphviz output
+        tree = ElementTree.parse(svg_path)  # nosec B314 - parsing trusted local graphviz output
         root = tree.getroot()
 
         # SVG namespace
@@ -279,7 +279,7 @@ class PatentDiagramGenerator:
 
         return output_path
 
-    def get_templates(self) -> Dict[str, str]:
+    def get_templates(self) -> dict[str, str]:
         """
         Get common patent diagram templates
 
@@ -368,7 +368,7 @@ digraph ComponentHierarchy {
         return templates
 
 
-def check_graphviz_installed() -> Dict[str, Any]:
+def check_graphviz_installed() -> dict[str, Any]:
     """Check if Graphviz is installed and available"""
     if GraphvizInstaller:
         installer = GraphvizInstaller()

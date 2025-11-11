@@ -87,14 +87,14 @@ class PathFormatter:
         - CMD (default on Windows)
         - Bash/sh (Linux/macOS)
         """
-        path_str = str(Path(path).resolve())
+        str(Path(path).resolve())
 
         # Check for Git Bash or WSL
         if os.getenv("MSYSTEM") or os.getenv("WSL_DISTRO_NAME"):
             return PathFormatter.for_bash(path)
 
         # Check for PowerShell
-        if os.getenv("PSMODULEPATH") or os.getenv("PSModulePath"):
+        if os.getenv("PSMODULEPATH"):
             return PathFormatter.for_powershell(path)
 
         # Check platform
@@ -136,7 +136,7 @@ class PathFormatter:
             return "git-bash"
         if os.getenv("WSL_DISTRO_NAME"):
             return "wsl"
-        if os.getenv("PSMODULEPATH") or os.getenv("PSModulePath"):
+        if os.getenv("PSMODULEPATH"):
             return "powershell"
 
         # Check SHELL environment variable (Linux/macOS)
@@ -221,7 +221,7 @@ class PathValidator:
 
         Returns: Suggested fix command or instruction
         """
-        path_str = str(path)
+        str(path)
 
         if "not found" in issue.lower():
             parent = Path(path).parent

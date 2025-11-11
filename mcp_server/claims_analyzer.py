@@ -6,11 +6,11 @@ Based on research from plint, cgupatent/antecedent-check, and PEDANTIC
 """
 
 import re
-from typing import Dict, List, Tuple, Optional, Set, Any
-from dataclasses import dataclass, field
 from collections import defaultdict
+from dataclasses import dataclass, field
+from typing import Any
 
-from mcp_server.analyzer_base import BaseIssue, BaseAnalyzer
+from mcp_server.analyzer_base import BaseAnalyzer, BaseIssue
 
 
 @dataclass
@@ -79,7 +79,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
         "usually",
     }
 
-    def analyze_claims(self, claims_text: str) -> Dict:
+    def analyze_claims(self, claims_text: str) -> dict:
         """
         Main analysis entry point
 
@@ -105,7 +105,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
         # Generate summary
         return self._generate_report(claims)
 
-    def _parse_claims(self, claims_text: str) -> List[Dict]:
+    def _parse_claims(self, claims_text: str) -> list[dict]:
         """Parse claims text into structured format"""
         claims = []
 
@@ -137,7 +137,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
 
         return claims
 
-    def _check_antecedent_basis(self, claim: Dict, all_claims: List[Dict]):
+    def _check_antecedent_basis(self, claim: dict, all_claims: list[dict]):
         """
         Check for antecedent basis errors
 
@@ -161,11 +161,11 @@ class ClaimsAnalyzer(BaseAnalyzer):
         # Until a semantic parser is implemented, this check is disabled to avoid
         # creating unnecessary work filtering false positives.
         #
-        # To re-enable: Set ENABLE_ANTECEDENT_BASIS_CHECK = True below
+        # To re-enable: Set enable_antecedent_basis_check = True below
 
-        ENABLE_ANTECEDENT_BASIS_CHECK = False
+        enable_antecedent_basis_check = False
 
-        if not ENABLE_ANTECEDENT_BASIS_CHECK:
+        if not enable_antecedent_basis_check:
             return
 
         claim_text = claim["text"]
@@ -219,7 +219,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
                     )
                 )
 
-    def _build_element_registry(self, claim: Dict, all_claims: List[Dict]) -> Set[str]:
+    def _build_element_registry(self, claim: dict, all_claims: list[dict]) -> set[str]:
         """Build set of all known elements from claim and its dependencies"""
         known = set()
 
@@ -237,7 +237,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
 
         return known
 
-    def _check_definiteness(self, claim: Dict):
+    def _check_definiteness(self, claim: dict):
         """Check for definiteness issues under 35 USC 112(b)"""
         claim_text = claim["text"].lower()
         claim_num = claim["number"]
@@ -266,7 +266,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
                     )
                 )
 
-    def _check_subjective_terms(self, claim: Dict):
+    def _check_subjective_terms(self, claim: dict):
         """Check for subjective terms that may render claim indefinite"""
         claim_text = claim["text"].lower()
         claim_num = claim["number"]
@@ -283,13 +283,13 @@ class ClaimsAnalyzer(BaseAnalyzer):
                         location=self._find_phrase_location(claim, term),
                         term=term,
                         problem=f'Subjective term "{term}" - {reason}',
-                        fix=f"Replace with objective, measurable criteria or quantitative values",
+                        fix="Replace with objective, measurable criteria or quantitative values",
                         mpep_ref="MPEP 2173.05(b)",
                         confidence="HIGH",  # Objective pattern matching - reliable
                     )
                 )
 
-    def _check_internal_references(self, claim: Dict):
+    def _check_internal_references(self, claim: dict):
         """Check for problematic internal cross-references"""
         claim_text = claim["text"]
         claim_num = claim["number"]
@@ -315,7 +315,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
                 )
             )
 
-    def _check_structure(self, claim: Dict):
+    def _check_structure(self, claim: dict):
         """Check claim structure for common issues"""
         claim_text = claim["text"]
         claim_num = claim["number"]
@@ -352,7 +352,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
                 )
             )
 
-    def _find_limitation_location(self, claim: Dict, char_position: int) -> str:
+    def _find_limitation_location(self, claim: dict, char_position: int) -> str:
         """Find which limitation contains the given character position"""
         if not claim["limitations"]:
             return "preamble"
@@ -364,7 +364,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
 
         return "unknown location"
 
-    def _find_phrase_location(self, claim: Dict, phrase: str) -> str:
+    def _find_phrase_location(self, claim: dict, phrase: str) -> str:
         """Find which limitation contains the given phrase"""
         for letter, text in claim["limitations"]:
             if phrase.lower() in text.lower():
@@ -416,7 +416,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
 
         return max_depth
 
-    def _issue_to_dict(self, issue: ClaimIssue) -> Dict[str, Any]:
+    def _issue_to_dict(self, issue: ClaimIssue) -> dict[str, Any]:
         """Convert ClaimIssue to dictionary"""
         return {
             "severity": issue.severity,
@@ -430,7 +430,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
             "confidence": issue.confidence,
         }
 
-    def _generate_report(self, claims: List[Dict]) -> Dict:
+    def _generate_report(self, claims: list[dict]) -> dict:
         """Generate comprehensive analysis report"""
         # Sort issues by severity and claim number
         self._sort_issues(secondary_key=lambda x: x.claim_number)
@@ -464,7 +464,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
             additional_data=additional_data,
         )
 
-    def _generate_claims_summary(self, claims: List[Dict], counts: Dict[str, int]) -> str:
+    def _generate_claims_summary(self, claims: list[dict], counts: dict[str, int]) -> str:
         """Generate claims-specific summary"""
         if counts["total"] == 0:
             return f"✅ All {len(claims)} claims are compliant with 35 USC 112(b)"

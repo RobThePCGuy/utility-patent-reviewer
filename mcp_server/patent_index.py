@@ -6,11 +6,10 @@ Mirrors MPEPIndex architecture for consistency
 """
 
 import json
-import os
 import pickle
 import site
 import sys
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 # CRITICAL: Disable user site-packages BEFORE importing third-party packages
 # This prevents conflicts with global user installations
@@ -97,7 +96,7 @@ class PatentCorpusIndex:
         if self.faiss_file.exists() and self.metadata_file.exists():
             self.load_index()
 
-    def chunk_patent(self, patent: Patent) -> List[Tuple[str, Dict]]:
+    def chunk_patent(self, patent: Patent) -> list[tuple[str, dict]]:
         """
         Chunk a patent into searchable pieces
         Strategy: Keep semantic units together
@@ -185,7 +184,7 @@ class PatentCorpusIndex:
 
         return chunks
 
-    def _chunk_text(self, text: str, chunk_size: int = 500, overlap: int = 100) -> List[str]:
+    def _chunk_text(self, text: str, chunk_size: int = 500, overlap: int = 100) -> list[str]:
         """Split text into overlapping chunks (same as MPEP)"""
         if len(text) <= chunk_size:
             return [text]
@@ -412,7 +411,7 @@ class PatentCorpusIndex:
         faiss.write_index(self.index, str(self.faiss_file))
 
         # Save metadata
-        with open(self.metadata_file, "w", encoding="utf-8") as f:
+        with self.metadata_file.open("w", encoding="utf-8") as f:
             json.dump(
                 {
                     "chunks": self.chunks,
@@ -423,7 +422,7 @@ class PatentCorpusIndex:
 
         # Save BM25 index
         if self.bm25:
-            with open(self.bm25_file, "wb") as f:
+            with self.bm25_file.open("wb") as f:
                 pickle.dump(self.bm25, f)
 
         print("Index saved", file=sys.stderr)
@@ -436,7 +435,7 @@ class PatentCorpusIndex:
         self.index = faiss.read_index(str(self.faiss_file))
 
         # Load metadata
-        with open(self.metadata_file, "r", encoding="utf-8") as f:
+        with self.metadata_file.open(encoding="utf-8") as f:
             data = json.load(f)
             self.chunks = data["chunks"]
             self.metadata = data["metadata"]
@@ -445,14 +444,14 @@ class PatentCorpusIndex:
         if BM25Okapi and self.bm25_file.exists():
             try:
                 # Note: pickle is only used for locally-generated index files (trusted source)
-                with open(self.bm25_file, "rb") as f:
+                with self.bm25_file.open("rb") as f:
                     self.bm25 = pickle.load(f)  # nosec B301 - loading trusted local index
                 print("Hybrid search enabled", file=sys.stderr)
             except Exception as e:
                 print(f"Failed to load BM25 index: {e}", file=sys.stderr)
 
         print(
-            f"Loaded {len(self.chunks)} chunks from {len(set(m['patent_id'] for m in self.metadata))} patents",
+            f"Loaded {len(self.chunks)} chunks from {len({m['patent_id'] for m in self.metadata})} patents",
             file=sys.stderr,
         )
 
@@ -462,8 +461,8 @@ class PatentCorpusIndex:
         top_k: int = 10,
         retrieve_k: Optional[int] = None,
         cpc_filter: Optional[str] = None,
-        date_range: Optional[Tuple[str, str]] = None,
-    ) -> List[Dict[str, Any]]:
+        date_range: Optional[tuple[str, str]] = None,
+    ) -> list[dict[str, Any]]:
         """
         Hybrid search for similar patents
 
@@ -480,10 +479,7 @@ class PatentCorpusIndex:
         if self.index is None:
             raise ValueError("Index not built. Run build_index() first.")
 
-        if retrieve_k is None:
-            retrieve_k = min(top_k * 4, 50)
-        else:
-            retrieve_k = min(retrieve_k, 100)
+        retrieve_k = min(top_k * 4, 50) if retrieve_k is None else min(retrieve_k, 100)
 
         # Apply HyDE if enabled
         search_query = query
@@ -606,7 +602,7 @@ class PatentCorpusIndex:
 
         return results
 
-    def get_patent_chunks(self, patent_id: str) -> List[Dict[str, Any]]:
+    def get_patent_chunks(self, patent_id: str) -> list[dict[str, Any]]:
         """Get all chunks for a specific patent"""
         chunks = []
         for chunk, meta in zip(self.chunks, self.metadata):

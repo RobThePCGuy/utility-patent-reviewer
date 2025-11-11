@@ -8,7 +8,7 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 try:
     from datasets import Dataset  # type: ignore
@@ -37,7 +37,7 @@ class MPEPEvaluator:
         self.results_dir.mkdir(exist_ok=True)
         self.test_dataset_file = Path(__file__).parent / "test_dataset.json"
 
-    def create_test_dataset(self) -> List[Dict[str, Any]]:
+    def create_test_dataset(self) -> list[dict[str, Any]]:
         """Create golden dataset of MPEP questions for evaluation"""
         test_cases = [
             {
@@ -82,22 +82,22 @@ class MPEPEvaluator:
             },
         ]
 
-        with open(self.test_dataset_file, "w", encoding="utf-8") as f:
+        with self.test_dataset_file.open("w", encoding="utf-8") as f:
             json.dump(test_cases, f, indent=2)
 
         print(f"Created test dataset with {len(test_cases)} questions", file=sys.stderr)
         return test_cases
 
-    def load_test_dataset(self) -> List[Dict[str, Any]]:
+    def load_test_dataset(self) -> list[dict[str, Any]]:
         """Load existing test dataset or create new one"""
         if self.test_dataset_file.exists():
-            with open(self.test_dataset_file, "r", encoding="utf-8") as f:
+            with self.test_dataset_file.open(encoding="utf-8") as f:
                 return json.load(f)
         return self.create_test_dataset()
 
     def evaluate_rag_pipeline(
-        self, mpep_index, test_cases: Optional[List[Dict[str, Any]]] = None
-    ) -> Dict[str, Any]:
+        self, mpep_index, test_cases: Optional[list[dict[str, Any]]] = None
+    ) -> dict[str, Any]:
         """Evaluate RAG pipeline using RAGAS metrics"""
         if not RAGAS_AVAILABLE:
             return {"error": "RAGAS not installed. Install with: pip install ragas datasets"}
@@ -167,7 +167,7 @@ class MPEPEvaluator:
             "test_cases": test_cases,
         }
 
-        with open(results_file, "w", encoding="utf-8") as f:
+        with results_file.open("w", encoding="utf-8") as f:
             json.dump(evaluation_results, f, indent=2)
 
         print("\nEvaluation Results:", file=sys.stderr)
@@ -179,11 +179,11 @@ class MPEPEvaluator:
 
         return evaluation_results
 
-    def compare_evaluations(self, baseline_file: str, current_file: str) -> Dict[str, Any]:
+    def compare_evaluations(self, baseline_file: str, current_file: str) -> dict[str, Any]:
         """Compare two evaluation runs to measure improvement"""
-        with open(baseline_file, "r") as f:
+        with Path(baseline_file).open() as f:
             baseline = json.load(f)
-        with open(current_file, "r") as f:
+        with Path(current_file).open() as f:
             current = json.load(f)
 
         comparison = {

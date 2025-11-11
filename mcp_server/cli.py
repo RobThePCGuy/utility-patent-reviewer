@@ -5,6 +5,7 @@ Provides easy setup and management commands
 """
 
 import argparse
+import contextlib
 import json
 import os
 import platform
@@ -50,13 +51,11 @@ def configure_mcp_server():
     """
     Register the MCP server with Claude Code using 'claude mcp add' command
     """
-    import platform
 
     # Get correct paths - server.py is in project_root/mcp_server/, not in MPEP_DIR (pdfs/)
     project_root = Path(__file__).parent.parent.resolve()  # Go up from mcp_server/ to project root
     server_script = (project_root / "mcp_server" / "server.py").resolve()
     python_path = Path(sys.executable).resolve()
-    is_windows = platform.system() == "Windows"
 
     print("\n" + "=" * 60, file=sys.stderr)
     print("Registering MCP Server with Claude Code", file=sys.stderr)
@@ -106,14 +105,12 @@ def configure_mcp_server():
         return False
 
     # Remove existing registration if present
-    try:
+    with contextlib.suppress(Exception):
         subprocess.run(
             ["claude", "mcp", "remove", "utility-patent-reviewer"],
             capture_output=True,
             timeout=10,
         )
-    except Exception:
-        pass
 
     # Register the MCP server with correct format
     # Use PathFormatter for proper cross-platform path handling
@@ -342,7 +339,7 @@ def run_server(args):
     return 0
 
 
-def status_command(args):
+def status_command(_args):
     """
     Show current installation status
     """
@@ -385,11 +382,11 @@ def status_command(args):
         if metadata_file.exists():
             import json
 
-            with open(metadata_file, "r", encoding="utf-8") as f:
+            with metadata_file.open(encoding="utf-8") as f:
                 data = json.load(f)
                 print(f"  Chunks:    {len(data['chunks']):,}", file=sys.stderr)
                 print(
-                    f"  Sections:  {len(set(m['section'] for m in data['metadata'])):,}",
+                    f"  Sections:  {len({m['section'] for m in data['metadata']}):,}",
                     file=sys.stderr,
                 )
 
@@ -502,7 +499,7 @@ def build_patent_index_command(args):
     return 0
 
 
-def patents_status_command(args):
+def patents_status_command(_args):
     """
     Show patent corpus status
     """
@@ -537,10 +534,10 @@ def patents_status_command(args):
     if index_exists:
         metadata_file = PATENT_INDEX_DIR / "patent_metadata.json"
         if metadata_file.exists():
-            with open(metadata_file, "r", encoding="utf-8") as f:
+            with metadata_file.open(encoding="utf-8") as f:
                 data = json.load(f)
                 num_chunks = len(data["chunks"])
-                num_patents = len(set(m["patent_id"] for m in data["metadata"]))
+                num_patents = len({m["patent_id"] for m in data["metadata"]})
                 print(f"  Patents: {num_patents:,}", file=sys.stderr)
                 print(f"  Chunks: {num_chunks:,}", file=sys.stderr)
 
@@ -568,7 +565,7 @@ def patents_status_command(args):
     return 0
 
 
-def verify_config_command(args):
+def verify_config_command(_args):
     """Verify Claude Code MCP configuration"""
     print("\n" + "=" * 70, file=sys.stderr)
     print("Claude Code MCP Configuration Verification", file=sys.stderr)
@@ -583,43 +580,43 @@ def verify_config_command(args):
     expected_python = Path(sys.executable).resolve()
     expected_server = (project_root / "mcp_server" / "server.py").resolve()
 
-    print(f"\nExpected Configuration:", file=sys.stderr)
+    print("\nExpected Configuration:", file=sys.stderr)
     print(f"  Python: {expected_python}", file=sys.stderr)
     print(f"  Server: {expected_server}", file=sys.stderr)
     print(f"  Config: {config_path}", file=sys.stderr)
 
     # Check if paths exist
-    print(f"\nPath Verification:", file=sys.stderr)
+    print("\nPath Verification:", file=sys.stderr)
     if expected_python.exists():
-        print(f"  ✓ Python executable found", file=sys.stderr)
+        print("  ✓ Python executable found", file=sys.stderr)
     else:
         print(f"  ✗ Python executable NOT found: {expected_python}", file=sys.stderr)
 
     if expected_server.exists():
-        print(f"  ✓ Server script found", file=sys.stderr)
+        print("  ✓ Server script found", file=sys.stderr)
     else:
         print(f"  ✗ Server script NOT found: {expected_server}", file=sys.stderr)
 
     # Check Claude config
-    print(f"\nClaude Configuration:", file=sys.stderr)
+    print("\nClaude Configuration:", file=sys.stderr)
     if not config_path.exists():
         print(f"  ✗ Config file not found: {config_path}", file=sys.stderr)
         print(
-            f"\n  Run 'patent-reviewer setup' or 'python install.py' to create it", file=sys.stderr
+            "\n  Run 'patent-reviewer setup' or 'python install.py' to create it", file=sys.stderr
         )
         return 1
 
     try:
-        with open(config_path, "r", encoding="utf-8") as f:
+        with config_path.open(encoding="utf-8") as f:
             config = json.load(f)
 
         if "mcpServers" not in config:
-            print(f"  ✗ No 'mcpServers' section found", file=sys.stderr)
+            print("  ✗ No 'mcpServers' section found", file=sys.stderr)
             return 1
 
         if "utility-patent-reviewer" not in config["mcpServers"]:
-            print(f"  ✗ 'utility-patent-reviewer' server not registered", file=sys.stderr)
-            print(f"\n  Run: python install.py", file=sys.stderr)
+            print("  ✗ 'utility-patent-reviewer' server not registered", file=sys.stderr)
+            print("\n  Run: python install.py", file=sys.stderr)
             return 1
 
         server_config = config["mcpServers"]["utility-patent-reviewer"]
@@ -627,8 +624,8 @@ def verify_config_command(args):
         actual_args = server_config.get("args", [])
         actual_server = actual_args[0] if actual_args else ""
 
-        print(f"  ✓ Configuration found", file=sys.stderr)
-        print(f"\nActual Configuration:", file=sys.stderr)
+        print("  ✓ Configuration found", file=sys.stderr)
+        print("\nActual Configuration:", file=sys.stderr)
         print(f"  Python: {actual_python}", file=sys.stderr)
         print(f"  Server: {actual_server}", file=sys.stderr)
 
@@ -641,38 +638,38 @@ def verify_config_command(args):
         actual_python_norm = normalize_path(actual_python)
         actual_server_norm = normalize_path(actual_server)
 
-        print(f"\nConfiguration Status:", file=sys.stderr)
+        print("\nConfiguration Status:", file=sys.stderr)
 
         python_match = expected_python_norm == actual_python_norm
         server_match = expected_server_norm == actual_server_norm
 
         if python_match:
-            print(f"  ✓ Python path is correct", file=sys.stderr)
+            print("  ✓ Python path is correct", file=sys.stderr)
         else:
-            print(f"  ✗ Python path mismatch!", file=sys.stderr)
+            print("  ✗ Python path mismatch!", file=sys.stderr)
             print(f"    Expected: {expected_python}", file=sys.stderr)
             print(f"    Actual:   {actual_python}", file=sys.stderr)
 
         if server_match:
-            print(f"  ✓ Server path is correct", file=sys.stderr)
+            print("  ✓ Server path is correct", file=sys.stderr)
         else:
-            print(f"  ✗ Server path mismatch!", file=sys.stderr)
+            print("  ✗ Server path mismatch!", file=sys.stderr)
             print(f"    Expected: {expected_server}", file=sys.stderr)
             print(f"    Actual:   {actual_server}", file=sys.stderr)
 
         if python_match and server_match:
-            print(f"\n✓ Configuration is correct!", file=sys.stderr)
-            print(f"\nIf the server still fails:", file=sys.stderr)
-            print(f"  1. Restart Claude Code", file=sys.stderr)
-            print(f"  2. Check logs in Claude Code", file=sys.stderr)
-            print(f"  3. Try: claude mcp list", file=sys.stderr)
+            print("\n✓ Configuration is correct!", file=sys.stderr)
+            print("\nIf the server still fails:", file=sys.stderr)
+            print("  1. Restart Claude Code", file=sys.stderr)
+            print("  2. Check logs in Claude Code", file=sys.stderr)
+            print("  3. Try: claude mcp list", file=sys.stderr)
             return 0
         else:
-            print(f"\n✗ Configuration needs to be fixed!", file=sys.stderr)
-            print(f"\nTo fix:", file=sys.stderr)
-            print(f"  Option 1: Run 'python install.py' to re-register", file=sys.stderr)
+            print("\n✗ Configuration needs to be fixed!", file=sys.stderr)
+            print("\nTo fix:", file=sys.stderr)
+            print("  Option 1: Run 'python install.py' to re-register", file=sys.stderr)
             print(f"  Option 2: Manually edit {config_path}", file=sys.stderr)
-            print(f"\nCorrect values:", file=sys.stderr)
+            print("\nCorrect values:", file=sys.stderr)
             print(f'  "command": "{expected_python.as_posix()}"', file=sys.stderr)
             print(f'  "args": ["{expected_server.as_posix()}"]', file=sys.stderr)
             return 1

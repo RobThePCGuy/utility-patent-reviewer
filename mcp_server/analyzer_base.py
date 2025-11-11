@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 
 @dataclass
@@ -38,10 +38,10 @@ class BaseAnalyzer(ABC):
 
     def __init__(self):
         """Initialize analyzer with empty issues list"""
-        self.issues: List[BaseIssue] = []
+        self.issues: list[BaseIssue] = []
 
     @abstractmethod
-    def analyze(self, *args, **kwargs) -> Dict[str, Any]:
+    def analyze(self, *args, **kwargs) -> dict[str, Any]:
         """Main analysis method - override in subclass
 
         Should populate self.issues and call _generate_report()
@@ -62,7 +62,7 @@ class BaseAnalyzer(ABC):
         else:
             self.issues.sort(key=lambda x: self.SEVERITY_ORDER[x.severity])
 
-    def _count_by_severity(self) -> Dict[str, int]:
+    def _count_by_severity(self) -> dict[str, int]:
         """Count issues by severity level
 
         Returns:
@@ -84,8 +84,8 @@ class BaseAnalyzer(ABC):
         score_name: str,
         score_value: float,
         summary: str,
-        additional_data: Dict[str, Any] = None,
-    ) -> Dict[str, Any]:
+        additional_data: dict[str, Any] = None,
+    ) -> dict[str, Any]:
         """Generate standard report structure
 
         Args:
@@ -115,7 +115,7 @@ class BaseAnalyzer(ABC):
         return report
 
     @abstractmethod
-    def _issue_to_dict(self, issue: BaseIssue) -> Dict[str, Any]:
+    def _issue_to_dict(self, issue: BaseIssue) -> dict[str, Any]:
         """Convert issue to dictionary - override in subclass
 
         Each subclass may have different fields to serialize

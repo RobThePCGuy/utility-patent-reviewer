@@ -5,7 +5,7 @@ import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -23,10 +23,10 @@ class PatentSearchResult:
     title: Optional[str]
     application_type: Optional[str]
     status: Optional[str]
-    inventors: List[str]
-    applicants: List[str]
+    inventors: list[str]
+    applicants: list[str]
     abstract: Optional[str]
-    raw_data: Dict[str, Any]
+    raw_data: dict[str, Any]
 
 
 class USPTOAPIError(Exception):
@@ -89,7 +89,7 @@ class USPTOClient:
                 }
             )
 
-    def _make_request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
+    def _make_request(self, method: str, endpoint: str, **kwargs) -> dict[str, Any]:
         """Make HTTP request to USPTO API with error handling
 
         Args:
@@ -175,16 +175,15 @@ class USPTOClient:
                 )
 
             # Check for empty results and provide context
-            if isinstance(result, dict) and result.get("results") is not None:
-                if len(result["results"]) == 0:
-                    # Empty results - provide diagnostic context
-                    total_hits = result.get("totalHits", 0)
-                    if total_hits == 0:
-                        # Truly no matches - this is informational, not an error
-                        pass
-                    else:
-                        # Has matches but results are empty (pagination issue?)
-                        pass
+            if isinstance(result, dict) and result.get("results") is not None and len(result["results"]) == 0:
+                # Empty results - provide diagnostic context
+                total_hits = result.get("totalHits", 0)
+                if total_hits == 0:
+                    # Truly no matches - this is informational, not an error
+                    pass
+                else:
+                    # Has matches but results are empty (pagination issue?)
+                    pass
 
             return result
 
@@ -218,14 +217,14 @@ class USPTOClient:
     def search_patents(
         self,
         query: Optional[str] = None,
-        filters: Optional[List[Dict[str, Any]]] = None,
-        range_filters: Optional[List[Dict[str, Any]]] = None,
-        sort: Optional[List[Dict[str, str]]] = None,
-        fields: Optional[List[str]] = None,
+        filters: Optional[list[dict[str, Any]]] = None,
+        range_filters: Optional[list[dict[str, Any]]] = None,
+        sort: Optional[list[dict[str, str]]] = None,
+        fields: Optional[list[str]] = None,
         offset: int = 0,
         limit: int = 25,
-        facets: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        facets: Optional[list[str]] = None,
+    ) -> dict[str, Any]:
         """Search patents using USPTO Open Data Portal API
 
         Args:
@@ -256,7 +255,7 @@ class USPTOClient:
             USPTOAPIError: If search fails
         """
         # Build POST request body
-        body: Dict[str, Any] = {
+        body: dict[str, Any] = {
             "pagination": {"offset": offset, "limit": min(limit, 100)}  # Cap at 100
         }
 
@@ -283,7 +282,7 @@ class USPTOClient:
         end_year: Optional[int] = None,
         application_type: Optional[str] = None,
         status: Optional[str] = None,
-    ) -> List[PatentSearchResult]:
+    ) -> list[PatentSearchResult]:
         """Simplified patent search with common filters
 
         Args:
@@ -320,7 +319,7 @@ class USPTOClient:
 
         # Add year range filter
         if start_year or end_year:
-            range_filter: Dict[str, Any] = {"field": "applicationMetaData.grantDate"}
+            range_filter: dict[str, Any] = {"field": "applicationMetaData.grantDate"}
             if start_year:
                 range_filter["valueFrom"] = f"{start_year}-01-01"
             else:
@@ -390,7 +389,7 @@ class USPTOClient:
             return self._parse_patent_result(results[0])
         return None
 
-    def _parse_patent_result(self, data: Dict[str, Any]) -> PatentSearchResult:
+    def _parse_patent_result(self, data: dict[str, Any]) -> PatentSearchResult:
         """Parse patent data from API response into PatentSearchResult
 
         Args:
@@ -434,7 +433,7 @@ class USPTOClient:
 
     def get_recent_patents(
         self, days: int = 7, application_type: str = "Utility", limit: int = 100
-    ) -> List[PatentSearchResult]:
+    ) -> list[PatentSearchResult]:
         """Get recently granted patents
 
         Args:
@@ -487,7 +486,7 @@ class USPTOClient:
             print(f"ERROR: USPTO API error: {e}", file=sys.stderr)
             return False
 
-    def check_api_status_detailed(self) -> Dict[str, Any]:
+    def check_api_status_detailed(self) -> dict[str, Any]:
         """Check API status with detailed diagnostics
 
         Returns:

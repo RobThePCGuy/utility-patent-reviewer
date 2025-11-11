@@ -5,10 +5,10 @@ Automated checking of MPEP 608 formality requirements
 """
 
 import re
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
+from typing import Any, Optional
 
-from mcp_server.analyzer_base import BaseIssue, BaseAnalyzer
+from mcp_server.analyzer_base import BaseAnalyzer, BaseIssue
 
 
 @dataclass
@@ -35,7 +35,7 @@ class FormalitiesChecker(BaseAnalyzer):
     # 37 CFR 1.84 - Drawings requirements
     REQUIRED_DRAWING_ELEMENTS = ["reference numerals", "figure numbers", "lead lines"]
 
-    def _issue_to_dict(self, issue: FormalityIssue) -> Dict[str, Any]:
+    def _issue_to_dict(self, issue: FormalityIssue) -> dict[str, Any]:
         """Convert FormalityIssue to dictionary"""
         return {
             "section": issue.section,
@@ -54,7 +54,7 @@ class FormalitiesChecker(BaseAnalyzer):
         title: Optional[str] = None,
         specification: Optional[str] = None,
         drawings_present: bool = False,
-    ) -> Dict:
+    ) -> dict:
         """
         Check all formality requirements
 
@@ -88,7 +88,7 @@ class FormalitiesChecker(BaseAnalyzer):
             "overall_compliant": len([i for i in self.issues if i.severity == "CRITICAL"]) == 0,
         }
 
-    def _check_abstract(self, abstract: str) -> Dict:
+    def _check_abstract(self, abstract: str) -> dict:
         """Check abstract compliance with MPEP 608.01(b)"""
         # Remove leading/trailing whitespace
         abstract = abstract.strip()
@@ -118,7 +118,7 @@ class FormalitiesChecker(BaseAnalyzer):
                 FormalityIssue(
                     section="abstract",
                     severity="WARNING",
-                    problem=f"Abstract is too short",
+                    problem="Abstract is too short",
                     current_value=f"{word_count} words",
                     required_value=f"{self.ABSTRACT_MIN_WORDS}-{self.ABSTRACT_MAX_WORDS} words",
                     fix=f"Expand abstract to at least {self.ABSTRACT_MIN_WORDS} words",
@@ -133,7 +133,7 @@ class FormalitiesChecker(BaseAnalyzer):
                 FormalityIssue(
                     section="abstract",
                     severity="WARNING",
-                    problem=f"Abstract exceeds recommended length",
+                    problem="Abstract exceeds recommended length",
                     current_value=f"{word_count} words",
                     required_value=f"{self.ABSTRACT_MIN_WORDS}-{self.ABSTRACT_MAX_WORDS} words",
                     fix=f"Reduce abstract to {self.ABSTRACT_MAX_WORDS} words or less",
@@ -165,7 +165,7 @@ class FormalitiesChecker(BaseAnalyzer):
                 FormalityIssue(
                     section="abstract",
                     severity="INFO",
-                    problem=f"Abstract contains patent claim phraseology",
+                    problem="Abstract contains patent claim phraseology",
                     current_value=f'Contains: {", ".join(found_forbidden)}',
                     required_value='Should avoid "means", "said", "whereby"',
                     fix=f'Remove or rephrase to avoid: {", ".join(found_forbidden)}',
@@ -191,7 +191,7 @@ class FormalitiesChecker(BaseAnalyzer):
 
         return result
 
-    def _check_title(self, title: str) -> Dict:
+    def _check_title(self, title: str) -> dict:
         """Check title compliance with 37 CFR 1.72(a)"""
         title = title.strip()
 
@@ -270,7 +270,7 @@ class FormalitiesChecker(BaseAnalyzer):
 
         return result
 
-    def _check_specification_sections(self, specification: str) -> Dict:
+    def _check_specification_sections(self, specification: str) -> dict:
         """Check for required specification sections per 37 CFR 1.77"""
         required_sections = {
             "BACKGROUND": r"(?i)BACKGROUND(?:\s+OF)?(?:\s+THE)?(?:\s+INVENTION)?",
@@ -311,7 +311,7 @@ class FormalitiesChecker(BaseAnalyzer):
 
         return result
 
-    def _check_drawing_references(self, specification: str, drawings_present: bool) -> Dict:
+    def _check_drawing_references(self, specification: str, drawings_present: bool) -> dict:
         """Check drawing references and compliance"""
 
         # Extract figure references from specification
@@ -319,7 +319,7 @@ class FormalitiesChecker(BaseAnalyzer):
         referenced_figures = set(fig_pattern.findall(specification))
 
         result = {
-            "figures_referenced": sorted(list(referenced_figures)),
+            "figures_referenced": sorted(referenced_figures),
             "figure_count": len(referenced_figures),
             "drawings_provided": drawings_present,
             "compliant": True,
@@ -360,22 +360,22 @@ class FormalitiesChecker(BaseAnalyzer):
 
         return result
 
-    def _generate_compliance_summary(self, results: Dict) -> Dict:
+    def _generate_compliance_summary(self, results: dict) -> dict:
         """Generate overall compliance summary"""
-        total_checks = 0
         passed_checks = 0
         critical_issues = 0
         warnings = 0
         info = 0
 
         for issue in self.issues:
-            total_checks += 1
             if issue.severity == "CRITICAL":
                 critical_issues += 1
             elif issue.severity == "WARNING":
                 warnings += 1
             else:
                 info += 1
+
+        total_checks = len(self.issues)
 
         # Count passed checks from results
         if results.get("abstract") and results["abstract"].get("compliant"):

@@ -4,12 +4,11 @@ System Health Checker for Utility Patent Reviewer
 Provides comprehensive pre-flight dependency validation
 """
 
-import json
 import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import from server module
 try:
@@ -26,7 +25,7 @@ class SystemHealthChecker:
     def __init__(self):
         self.results = {}
 
-    def check_all_dependencies(self, verbose: bool = False) -> Dict[str, Any]:
+    def check_all_dependencies(self, verbose: bool = False) -> dict[str, Any]:
         """Run all health checks and return comprehensive status"""
         print("Running system health checks...", file=sys.stderr) if verbose else None
 
@@ -63,7 +62,7 @@ class SystemHealthChecker:
 
         return self.results
 
-    def _check_mpep_index(self) -> Dict[str, Any]:
+    def _check_mpep_index(self) -> dict[str, Any]:
         """Check if MPEP index is built and ready"""
         index_file = INDEX_DIR / "mpep_index.faiss"
         metadata_file = INDEX_DIR / "mpep_metadata.json"
@@ -84,13 +83,14 @@ class SystemHealthChecker:
 
         # Check index integrity
         try:
-            import faiss
             import json
+
+            import faiss
 
             index = faiss.read_index(str(index_file))
             chunk_count = index.ntotal
 
-            with open(metadata_file, "r", encoding="utf-8") as f:
+            with metadata_file.open(encoding="utf-8") as f:
                 metadata = json.load(f)
 
             return {
@@ -110,7 +110,7 @@ class SystemHealthChecker:
                 "details": "Index files exist but are corrupted. Rebuild required.",
             }
 
-    def _check_patent_corpus(self) -> Dict[str, Any]:
+    def _check_patent_corpus(self) -> dict[str, Any]:
         """Check if patent corpus is downloaded and indexed"""
         try:
             from mcp_server.patent_corpus import PATENT_INDEX_DIR
@@ -155,7 +155,7 @@ class SystemHealthChecker:
                 "fix": "patent-reviewer download-patents --build-index --force",
             }
 
-    def _check_uspto_api(self) -> Dict[str, Any]:
+    def _check_uspto_api(self) -> dict[str, Any]:
         """Check USPTO API key and connectivity"""
         api_key = os.getenv("USPTO_API_KEY")
 
@@ -232,11 +232,15 @@ class SystemHealthChecker:
                 "fix": "Check network connectivity and API key validity",
             }
 
-    def _check_graphviz(self) -> Dict[str, Any]:
+    def _check_graphviz(self) -> dict[str, Any]:
         """Check if Graphviz is installed for diagram generation"""
         try:
-            import graphviz
+            import importlib.util
             import subprocess
+
+            # Check if graphviz Python package is available
+            if importlib.util.find_spec("graphviz") is None:
+                raise ImportError("graphviz package not found")
 
             # Check system Graphviz installation
             try:
@@ -270,7 +274,7 @@ class SystemHealthChecker:
                 "required_for": ["diagram generation tools"],
             }
 
-    def _check_gpu(self) -> Dict[str, Any]:
+    def _check_gpu(self) -> dict[str, Any]:
         """Check GPU availability and status"""
         try:
             import torch
@@ -310,7 +314,7 @@ class SystemHealthChecker:
                 "fix": "pip install torch",
             }
 
-    def _check_disk_space(self) -> Dict[str, Any]:
+    def _check_disk_space(self) -> dict[str, Any]:
         """Check available disk space"""
         try:
             import shutil
@@ -350,7 +354,7 @@ class SystemHealthChecker:
                 "error": str(e),
             }
 
-    def _check_models(self) -> Dict[str, Any]:
+    def _check_models(self) -> dict[str, Any]:
         """Check if required AI models can be loaded"""
         models_status = {
             "embeddings": {"ready": False},
@@ -359,11 +363,11 @@ class SystemHealthChecker:
         }
 
         try:
-            from sentence_transformers import SentenceTransformer, CrossEncoder
+            from sentence_transformers import CrossEncoder, SentenceTransformer
 
             # Test embeddings model
             try:
-                model = SentenceTransformer("BAAI/bge-base-en-v1.5", device="cpu")
+                SentenceTransformer("BAAI/bge-base-en-v1.5", device="cpu")
                 models_status["embeddings"] = {
                     "ready": True,
                     "model": "BAAI/bge-base-en-v1.5",
@@ -378,7 +382,7 @@ class SystemHealthChecker:
 
             # Test reranker model
             try:
-                reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2", device="cpu")
+                CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2", device="cpu")
                 models_status["reranker"] = {
                     "ready": True,
                     "model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
@@ -390,7 +394,7 @@ class SystemHealthChecker:
             try:
                 from mcp_server.hyde import HyDEQueryExpander
 
-                hyde = HyDEQueryExpander(backend="auto")
+                HyDEQueryExpander(backend="auto")
                 models_status["hyde"] = {
                     "ready": True,
                     "optional": True,
@@ -420,7 +424,7 @@ class SystemHealthChecker:
             "models": models_status,
         }
 
-    def _check_packages(self) -> Dict[str, Any]:
+    def _check_packages(self) -> dict[str, Any]:
         """Check if critical Python packages are installed"""
         packages = {
             "torch": False,
@@ -465,7 +469,7 @@ class SystemHealthChecker:
             "fix": "pip install -e ." if not all_installed else None,
         }
 
-    def get_warnings(self) -> List[str]:
+    def get_warnings(self) -> list[str]:
         """Get list of warnings based on health check results"""
         warnings = []
 
@@ -530,7 +534,7 @@ class SystemHealthChecker:
         status_icon = "✓" if uspto.get("ready") else "✗"
         print(f"USPTO API............. {status_icon} ", end="", file=sys.stderr)
         if uspto.get("ready"):
-            print(f"Connected (API Key: ****)", file=sys.stderr)
+            print("Connected (API Key: ****)", file=sys.stderr)
         else:
             print(f"{uspto.get('status', 'unknown')}", file=sys.stderr)
             if uspto.get("fix"):
@@ -565,7 +569,7 @@ class SystemHealthChecker:
         # Models
         models = self.results.get("models", {})
         status_icon = "✓" if models.get("ready") else "✗"
-        print(f"\nModels:", file=sys.stderr)
+        print("\nModels:", file=sys.stderr)
         for model_type, model_info in models.get("models", {}).items():
             icon = "✓" if model_info.get("ready") else "✗"
             print(f"  {model_type.capitalize():15} {icon}", file=sys.stderr)
@@ -580,7 +584,7 @@ class SystemHealthChecker:
         # Warnings
         warnings = self.get_warnings()
         if warnings:
-            print(f"\nRECOMMENDATIONS:", file=sys.stderr)
+            print("\nRECOMMENDATIONS:", file=sys.stderr)
             for i, warning in enumerate(warnings, 1):
                 print(f"  {i}. {warning}", file=sys.stderr)
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Simplified Setup for Utility Patent Reviewer
 One command installation and setup
@@ -112,6 +111,7 @@ def run_command(cmd, description, check=True, show_output=False):
                 # On Windows, use a simple split that preserves quoted paths
                 cmd_list = []
                 import re
+
                 # Split on spaces but preserve quoted strings
                 parts = re.findall(r'(?:[^\s"]|"(?:\\.|[^"])*")+', cmd)
                 for part in parts:

@@ -13,7 +13,6 @@ Philosophy: Works great offline, even better with optional enhancements.
 import os
 import re
 import sys
-from typing import List
 
 
 class HyDEQueryExpander:
@@ -124,7 +123,7 @@ class HyDEQueryExpander:
         except Exception as e:
             raise ValueError(f"Failed to load local model: {e}")
 
-    def expand_query(self, query: str, num_expansions: int = 3) -> List[str]:
+    def expand_query(self, query: str, num_expansions: int = 3) -> list[str]:
         """
         Expand query into hypothetical documents
 
@@ -146,7 +145,7 @@ class HyDEQueryExpander:
         else:
             return [query]
 
-    def _rule_based_expansion(self, query: str, num_expansions: int) -> List[str]:
+    def _rule_based_expansion(self, query: str, num_expansions: int) -> list[str]:
         """
         Rule-based expansion using patent law domain knowledge
         Fast, offline, no dependencies
@@ -162,7 +161,7 @@ class HyDEQueryExpander:
 
         return expansions
 
-    def _get_patent_law_templates(self, query: str) -> List[str]:
+    def _get_patent_law_templates(self, query: str) -> list[str]:
         """Generate patent-law-specific expansions based on query patterns"""
         query_lower = query.lower()
         expansions = []
@@ -273,7 +272,7 @@ class HyDEQueryExpander:
 
         return expansions
 
-    def _anthropic_expansion(self, query: str, num_expansions: int) -> List[str]:
+    def _anthropic_expansion(self, query: str, num_expansions: int) -> list[str]:
         """Generate hypothetical documents using Anthropic API"""
         try:
             prompt = f"""You are a patent law expert. Given the query below, write a concise hypothetical answer as it would appear in the USPTO Manual of Patent Examining Procedure (MPEP).
@@ -295,7 +294,7 @@ Write a clear, technical answer (2-3 sentences) that would help find relevant MP
             print(f"HyDE API error: {e}, falling back to rule-based", file=sys.stderr)
             return self._rule_based_expansion(query, num_expansions)
 
-    def _openai_expansion(self, query: str, num_expansions: int) -> List[str]:
+    def _openai_expansion(self, query: str, num_expansions: int) -> list[str]:
         """Generate hypothetical documents using OpenAI API"""
         try:
             prompt = f"""You are a patent law expert. Given the query below, write a concise hypothetical answer as it would appear in the USPTO Manual of Patent Examining Procedure (MPEP).
@@ -317,7 +316,7 @@ Write a clear, technical answer (2-3 sentences) that would help find relevant MP
             print(f"HyDE API error: {e}, falling back to rule-based", file=sys.stderr)
             return self._rule_based_expansion(query, num_expansions)
 
-    def _local_expansion(self, query: str, num_expansions: int) -> List[str]:
+    def _local_expansion(self, query: str, num_expansions: int) -> list[str]:
         """Generate hypothetical documents using local model"""
         try:
             prompt = f"In patent law, {query}. The MPEP states that"

@@ -35,8 +35,11 @@ class FileDownloader:
         """
         # Validate URL scheme for security
         parsed_url = urllib.parse.urlparse(url)
-        if parsed_url.scheme not in ('http', 'https'):
-            print(f"Error: Invalid URL scheme '{parsed_url.scheme}'. Only HTTP and HTTPS are allowed.", file=sys.stderr)
+        if parsed_url.scheme not in ("http", "https"):
+            print(
+                f"Error: Invalid URL scheme '{parsed_url.scheme}'. Only HTTP and HTTPS are allowed.",
+                file=sys.stderr,
+            )
             return False
 
         print(f"\nDownloading {file_description} from {url}", file=sys.stderr)
@@ -66,7 +69,9 @@ class FileDownloader:
 
             try:
                 # Note: URL scheme validation performed above (HTTP/HTTPS only)
-                urllib.request.urlretrieve(url, dest_path, progress_hook)  # nosec B310 - validated URL
+                urllib.request.urlretrieve(
+                    url, dest_path, progress_hook
+                )  # nosec B310 - validated URL
                 print(f"\n✓ {file_description} download complete", file=sys.stderr)
                 return True
             finally:
@@ -86,7 +91,7 @@ class FileDownloader:
         except Exception as e:
             print(f"\n✗ Download failed: {e}", file=sys.stderr)
             if manual_instructions:
-                print(f"\nManual download instructions:", file=sys.stderr)
+                print("\nManual download instructions:", file=sys.stderr)
                 print(manual_instructions, file=sys.stderr)
             else:
                 print(f"\nManual download: Visit {url}", file=sys.stderr)
