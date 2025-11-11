@@ -606,8 +606,9 @@ class MPEPIndex:
                     import pickle
 
                     print("Loading BM25 index from disk...", file=sys.stderr)
+                    # Note: pickle is only used for locally-generated index files (trusted source)
                     with open(self.bm25_file, "rb") as f:
-                        self.bm25 = pickle.load(f)
+                        self.bm25 = pickle.load(f)  # nosec B301 - loading trusted local index
                     print("Hybrid search enabled", file=sys.stderr)
                 except Exception as e:
                     print(

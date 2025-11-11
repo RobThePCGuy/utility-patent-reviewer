@@ -5,15 +5,28 @@ Detects hardware and installs the correct PyTorch version automatically
 """
 
 import platform
+import shlex
 import subprocess
 import sys
 
 
 def run_command(cmd, description="Running command"):
-    """Run a command and return success status"""
+    """Run a command and return success status (secure version without shell=True)"""
     print(f"\n{description}...")
     try:
-        result = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True)
+        # Convert string command to list for secure execution
+        if isinstance(cmd, str):
+            if sys.platform == "win32":
+                # On Windows, use simple split for quoted paths
+                import re
+                parts = re.findall(r'(?:[^\s"]|"(?:\\.|[^"])*")+', cmd)
+                cmd_list = [part.strip('"') for part in parts]
+            else:
+                cmd_list = shlex.split(cmd)
+        else:
+            cmd_list = cmd
+
+        result = subprocess.run(cmd_list, check=True, capture_output=True, text=True)
         return True, result.stdout
     except subprocess.CalledProcessError as e:
         return False, e.stderr
@@ -76,11 +89,11 @@ def install_pytorch(gpu_available=False, compute_cap=None):
         print("=" * 60)
 
     # Uninstall any existing PyTorch first
-    subprocess.run(
-        f"{sys.executable} -m pip uninstall -y torch torchvision torchaudio",
-        shell=True,
-        capture_output=True,
-    )
+    uninstall_cmd = [
+        str(sys.executable), "-m", "pip", "uninstall", "-y",
+        "torch", "torchvision", "torchaudio"
+    ]
+    subprocess.run(uninstall_cmd, capture_output=True)
 
     cmd = f"{sys.executable} -m pip install torch torchvision --index-url https://download.pytorch.org/whl/{cuda_pkg}"
     return run_command(cmd, f"Installing PyTorch (CUDA {cuda_name})")

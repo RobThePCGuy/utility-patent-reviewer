@@ -116,7 +116,8 @@ class PatentsViewAPI:
                 url = f"{self.BASE_URL}?{urlencode({'q': json.dumps(query)})}"
                 req = Request(url, headers=headers)
 
-            with urlopen(req) as response:
+            # Note: URL scheme validation performed above (HTTPS only for API)
+            with urlopen(req) as response:  # nosec B310 - validated HTTPS URL
                 result = json.loads(response.read().decode("utf-8"))
                 return result
 

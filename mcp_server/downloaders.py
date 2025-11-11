@@ -65,7 +65,8 @@ class FileDownloader:
                     )
 
             try:
-                urllib.request.urlretrieve(url, dest_path, progress_hook)
+                # Note: URL scheme validation performed above (HTTP/HTTPS only)
+                urllib.request.urlretrieve(url, dest_path, progress_hook)  # nosec B310 - validated URL
                 print(f"\n✓ {file_description} download complete", file=sys.stderr)
                 return True
             finally:

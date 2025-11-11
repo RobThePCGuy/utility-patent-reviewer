@@ -444,8 +444,9 @@ class PatentCorpusIndex:
         # Load BM25 index
         if BM25Okapi and self.bm25_file.exists():
             try:
+                # Note: pickle is only used for locally-generated index files (trusted source)
                 with open(self.bm25_file, "rb") as f:
-                    self.bm25 = pickle.load(f)
+                    self.bm25 = pickle.load(f)  # nosec B301 - loading trusted local index
                 print("Hybrid search enabled", file=sys.stderr)
             except Exception as e:
                 print(f"Failed to load BM25 index: {e}", file=sys.stderr)

@@ -177,8 +177,10 @@ class HybridRAGIndex(ABC):
             if files["bm25"].exists():
                 import pickle
 
+                # Note: pickle is only used for locally-generated index files (trusted source)
+                # These files are created by this application and stored in the local file system
                 with open(files["bm25"], "rb") as f:
-                    self.bm25 = pickle.load(f)
+                    self.bm25 = pickle.load(f)  # nosec B301 - loading trusted local index
 
             print(f"Index loaded: {len(self.chunks)} chunks", file=sys.stderr)
             return True

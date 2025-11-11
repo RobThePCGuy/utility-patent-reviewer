@@ -253,7 +253,9 @@ class PatentDiagramGenerator:
             }
         """
         # Parse SVG
-        tree = ET.parse(svg_path)
+        # Note: This parses locally-generated SVG from graphviz (trusted source)
+        # defusedxml is used when available for defense-in-depth
+        tree = ET.parse(svg_path)  # nosec B314 - parsing trusted local graphviz output
         root = tree.getroot()
 
         # SVG namespace
