@@ -5,9 +5,16 @@ Renders technical diagrams from DOT code with patent-style annotations
 """
 
 import re
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+# Use defusedxml for secure XML parsing (prevents XML bombs and XXE attacks)
+try:
+    import defusedxml.ElementTree as ET
+except ImportError:
+    # Fallback to standard library if defusedxml not available
+    # Note: This is less secure and should only be used for trusted, locally-generated files
+    import xml.etree.ElementTree as ET
 
 try:
     import graphviz

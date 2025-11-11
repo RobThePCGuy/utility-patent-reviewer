@@ -48,6 +48,7 @@ RECENT CHANGES:
 
 import os
 import platform
+import shlex
 import shutil
 import subprocess
 import sys
@@ -100,12 +101,30 @@ def print_warning(message):
 
 
 def run_command(cmd, description, check=True, show_output=False):
-    """Run shell command with pretty output"""
+    """Run shell command with pretty output (secure version without shell=True)"""
     try:
         print_info(f"{description}...")
+
+        # Convert string command to list for secure execution
+        if isinstance(cmd, str):
+            # Use shlex.split for proper parsing, but handle Windows paths
+            if sys.platform == "win32":
+                # On Windows, use a simple split that preserves quoted paths
+                cmd_list = []
+                import re
+                # Split on spaces but preserve quoted strings
+                parts = re.findall(r'(?:[^\s"]|"(?:\\.|[^"])*")+', cmd)
+                for part in parts:
+                    # Remove quotes from parts
+                    cmd_list.append(part.strip('"'))
+            else:
+                cmd_list = shlex.split(cmd)
+        else:
+            cmd_list = cmd
+
         if show_output:
             # For commands that need to show real-time output (like pip installs)
-            result = subprocess.run(cmd, shell=True, check=check)
+            result = subprocess.run(cmd_list, check=check)
             if result.returncode == 0:
                 print_success(f"{description} complete")
                 return True
@@ -115,7 +134,7 @@ def run_command(cmd, description, check=True, show_output=False):
                 return False
         else:
             # For commands where we want to capture output
-            result = subprocess.run(cmd, shell=True, check=check, capture_output=True, text=True)
+            result = subprocess.run(cmd_list, check=check, capture_output=True, text=True)
             if result.returncode == 0:
                 print_success(f"{description} complete")
                 return True
@@ -330,8 +349,9 @@ def install_dependencies(env_info):
 
     all_ok = True
     for module, name in test_imports:
-        verify_cmd = f'"{venv_python}" -c "import {module}; print(\'OK\')"'
-        result = subprocess.run(verify_cmd, shell=True, capture_output=True, text=True)
+        # Use list-based command to avoid shell=True security risk
+        verify_cmd = [str(venv_python), "-c", f"import {module}; print('OK')"]
+        result = subprocess.run(verify_cmd, capture_output=True, text=True)
         if result.returncode != 0:
             print_error(f"{name} import failed")
             if result.stderr:

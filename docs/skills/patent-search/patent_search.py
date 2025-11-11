@@ -16,7 +16,7 @@ import os
 import sys
 import time
 from typing import Dict, List, Optional, Any
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
@@ -100,6 +100,11 @@ class PatentsViewAPI:
         headers = {"X-Api-Key": self.api_key, "Content-Type": "application/json"}
 
         try:
+            # Validate URL scheme for security (only allow HTTPS for API calls)
+            parsed_base = urlparse(self.BASE_URL)
+            if parsed_base.scheme != 'https':
+                raise ValueError(f"Invalid URL scheme: {parsed_base.scheme}. Only HTTPS is allowed for API calls.")
+
             if method == "POST":
                 req = Request(
                     self.BASE_URL,
