@@ -1,0 +1,52 @@
+# Funding options for Utility Patent Reviewer
+#
+# This file specifies funding platforms that will be displayed on the
+# repository sidebar to support the project's development.
+#
+# For more information, see: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+
+# GitHub Sponsors
+# Replace with your GitHub username to enable GitHub Sponsors
+github: RobThePCGuy
+
+# Alternative funding platforms
+# Replace with your usernames on each platform (remove # to enable)
+
+# Patreon
+# patreon: username
+
+# Open Collective
+# open_collective: username
+
+# Ko-fi
+# ko_fi: username
+
+# Buy Me a Coffee
+# custom: https://www.buymeacoffee.com/username
+
+# PayPal
+custom: https://paypal.me/robthepcguy
+
+
+# Crypto (if you accept cryptocurrency donations)
+# custom: [
+#   "https://etherscan.io/address/YOUR_ETH_ADDRESS",
+#   "Bitcoin: YOUR_BTC_ADDRESS"
+# ]
+
+# ============================================================================
+# Instructions:
+# ============================================================================
+#
+# 1. Uncomment (remove #) from the platforms you want to enable
+# 2. Replace 'username' or URLs with your actual account information
+# 3. Commit and push this file to make the sponsor button visible
+# 4. The sponsor button will appear in the repository sidebar
+#
+# Example for GitHub Sponsors:
+#   github: RobThePCGuy
+#
+# Example for Buy Me a Coffee:
+#   custom: https://www.buymeacoffee.com/robthepcguy
+#
+# Note: If you don't want to accept donations, you can delete this file.

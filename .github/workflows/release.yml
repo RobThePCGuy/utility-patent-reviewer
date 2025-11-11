@@ -1,0 +1,126 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+  discussions: write
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get the previous tag
+        PREV_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
+
+        if [ -z "$PREV_TAG" ]; then
+          # First release - get all commits
+          CHANGELOG=$(git log --pretty=format:"- %s (%h)" --reverse)
+        else
+          # Get commits since previous tag
+          CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --reverse)
+        fi
+
+        echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Build package
+      run: |
+        python -m build
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        name: Release ${{ steps.version.outputs.VERSION }}
+        body: |
+          ## What's Changed
+
+          ${{ steps.changelog.outputs.CHANGELOG }}
+
+          ## Installation
+
+          ```bash
+          git clone https://github.com/RobThePCGuy/utility-patent-reviewer.git
+          cd utility-patent-reviewer
+          git checkout v${{ steps.version.outputs.VERSION }}
+          python install.py
+          ```
+
+          ## Upgrade
+
+          ```bash
+          cd utility-patent-reviewer
+          git pull
+          git checkout v${{ steps.version.outputs.VERSION }}
+          pip install --upgrade -r requirements.txt
+          ```
+
+          ---
+
+          **Full Changelog**: https://github.com/RobThePCGuy/utility-patent-reviewer/compare/${{ github.event.before }}...${{ github.sha }}
+        draft: false
+        prerelease: false
+        files: |
+          dist/*
+        generate_release_notes: true
+        discussion_category_name: Announcements
+
+    - name: Publish to PyPI
+      if: startsWith(github.ref, 'refs/tags/v')
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        twine upload dist/* --skip-existing
+      continue-on-error: true
+
+  announce-release:
+    name: Announce Release
+    needs: create-release
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Create announcement discussion
+      uses: abirismyname/create-discussion@v1
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        title: "Release ${{ github.ref_name }} is now available!"
+        body: |
+          A new version of Utility Patent Reviewer has been released!
+
+          Check out the [release notes](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}) for details.
+        repository-id: ${{ github.repository }}
+        category-id: Announcements
+      continue-on-error: true
