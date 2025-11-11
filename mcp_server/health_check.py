@@ -192,7 +192,7 @@ class SystemHealthChecker:
                     "ready": True,
                     "available": True,
                     "api_key_configured": True,
-                    "api_key_prefix": f"{api_key[:8]}...{api_key[-4:]}",
+                    "api_key_status": "CONFIGURED",
                     "endpoint": client.BASE_URL,
                     "connectivity": "verified",
                     "response_time_ms": detailed_status.get("response_time_ms"),
@@ -208,7 +208,7 @@ class SystemHealthChecker:
                     "ready": False,
                     "available": False,
                     "api_key_configured": detailed_status["api_key_configured"],
-                    "api_key_prefix": f"{api_key[:8]}...{api_key[-4:]}" if api_key else None,
+                    "api_key_status": "CONFIGURED" if api_key else "NOT_CONFIGURED",
                     "error": detailed_status.get("error", "Unknown error"),
                     "message": detailed_status.get("message"),
                     "fix": "Verify API key at https://data.uspto.gov/myodp",
@@ -530,7 +530,7 @@ class SystemHealthChecker:
         status_icon = "✓" if uspto.get("ready") else "✗"
         print(f"USPTO API............. {status_icon} ", end="", file=sys.stderr)
         if uspto.get("ready"):
-            print(f"Connected (Key: {uspto.get('api_key_prefix', '***')})", file=sys.stderr)
+            print(f"Connected (API Key: ****)", file=sys.stderr)
         else:
             print(f"{uspto.get('status', 'unknown')}", file=sys.stderr)
             if uspto.get("fix"):
