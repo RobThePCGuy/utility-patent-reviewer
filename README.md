@@ -4,7 +4,7 @@
 
 ## Vision
 
-[![Run in Smithery](https://smithery.ai/badge/skills/robthepcguy)](https://smithery.ai/skills?ns=robthepcguy&utm_source=github&utm_medium=badge)
+[![Run in Smithery](https://smithery.ai/badge/skills/RobThePCGuy)](https://smithery.ai/skills?ns=RobThePCGuy&utm_source=github&utm_medium=badge)
 
 
 I have a dream... of a world where inventors can transform their ideas into patent-ready applications without navigating complex legal interfaces or paying prohibitive upfront costs. By combining Claude's reasoning capabilities with patent examination standards, I hope to bridge the gap between invention and protection by turning rough notes, drawings, and concepts into structured, examination-ready patent applications through natural conversation rather than specialized legal expertise.
