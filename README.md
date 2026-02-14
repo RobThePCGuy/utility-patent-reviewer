@@ -428,7 +428,7 @@ A: See [ADVANCED-README.md](ADVANCED-README.md) for detailed troubleshooting, or
 
 **Q: How current is the patent data?**
 
-A: PatentsView: Updated quarterly (current as of June 2025). USPTO API: Real-time.
+A: PatentsView: Updated quarterly. USPTO API: Real-time.
 
 **Q: Is my data private?**
 
@@ -488,7 +488,7 @@ Install Graphviz for your platform:
 - macOS: `brew install graphviz`
 - Linux: `sudo apt install graphviz`
 
-See [GRAPHVIZ_INSTALL.md](GRAPHVIZ_INSTALL.md) for detailed instructions.
+See [docs/GPU_SETUP.md](docs/GPU_SETUP.md) for detailed instructions.
 
 ### MCP server not showing in Claude Code
 
@@ -503,14 +503,10 @@ If not listed, the installer will show the manual registration command.
 The `install.py` script automatically detects and configures GPU support. To verify:
 
 ```bash
-python test_install.py
+patent-reviewer status
 ```
 
-This will show:
-- ✓ All package versions
-- ✓ GPU status and details
-- ✓ CUDA availability
-- ✓ Model loading test
+This will show GPU detection status, CUDA availability, and all component health.
 
 If GPU isn't detected but you have an NVIDIA GPU:
 
@@ -539,7 +535,7 @@ pip uninstall torch torchvision torchaudio
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
 
 # Verify
-python test_install.py
+patent-reviewer status
 ```
 
 See [ADVANCED-README.md](ADVANCED-README.md#gpu-acceleration) for advanced GPU configuration.
