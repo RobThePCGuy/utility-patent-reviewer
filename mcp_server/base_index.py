@@ -138,9 +138,9 @@ class HybridRAGIndex(ABC):
         faiss.write_index(self.index, str(files["faiss"]))
         print(f"FAISS index saved to {files['faiss']}", file=sys.stderr)
 
-        # Save metadata
+        # Save chunks and metadata together
         with files["metadata"].open("w") as f:
-            json.dump(self.metadata, f)
+            json.dump({"chunks": self.chunks, "metadata": self.metadata}, f)
         print(f"Metadata saved to {files['metadata']}", file=sys.stderr)
 
         # Save BM25 index
@@ -166,12 +166,19 @@ class HybridRAGIndex(ABC):
             # Load FAISS index
             self.index = faiss.read_index(str(files["faiss"]))
 
-            # Load metadata
+            # Load chunks and metadata
             with files["metadata"].open() as f:
-                self.metadata = json.load(f)
+                data = json.load(f)
 
-            # Rebuild chunks from metadata
-            self.chunks = [m.get("text", "") for m in self.metadata]
+            # Support both old format (list of metadata dicts) and
+            # new format (dict with "chunks" and "metadata" keys)
+            if isinstance(data, dict) and "chunks" in data:
+                self.chunks = data["chunks"]
+                self.metadata = data["metadata"]
+            else:
+                # Old format: data is a list of metadata dicts without chunk text
+                self.metadata = data
+                self.chunks = [m.get("text", "") for m in self.metadata]
 
             # Load BM25 if available
             if files["bm25"].exists():

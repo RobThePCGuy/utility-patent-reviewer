@@ -588,16 +588,20 @@ class MPEPIndex:
     def build_index(self, force_rebuild: bool = False):
         """Build or load the FAISS index with BM25"""
         if not force_rebuild and self.index_file.exists() and self.metadata_file.exists():
-            # Load existing index
-            self.index = faiss.read_index(str(self.index_file))
-            with self.metadata_file.open(encoding="utf-8") as f:
-                data = json.load(f)
-                self.chunks = data["chunks"]
-                self.metadata = data["metadata"]
-            print(f"Loaded existing index with {len(self.chunks)} chunks", file=sys.stderr)
+            try:
+                # Load existing index
+                self.index = faiss.read_index(str(self.index_file))
+                with self.metadata_file.open(encoding="utf-8") as f:
+                    data = json.load(f)
+                    self.chunks = data["chunks"]
+                    self.metadata = data["metadata"]
+                print(f"Loaded existing index with {len(self.chunks)} chunks", file=sys.stderr)
+            except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
+                print(f"Failed to load index files, will rebuild: {e}", file=sys.stderr)
+                force_rebuild = True
 
             # Load BM25 index from pickle if available
-            if BM25Okapi and self.bm25_file.exists():
+            if not force_rebuild and BM25Okapi and self.bm25_file.exists():
                 try:
                     import pickle
 
@@ -805,6 +809,8 @@ class MPEPIndex:
 
             # Add vector search results with RRF scoring
             for rank, (idx, dist) in enumerate(zip(vec_indices[0], vec_distances[0])):
+                if idx < 0 or idx >= len(self.chunks):
+                    continue
                 rrf_contribution = query_weight * (1.0 / (60 + rank + 1))
 
                 if idx in candidates:
@@ -827,6 +833,8 @@ class MPEPIndex:
                 bm25_top_indices = np.argsort(bm25_scores)[::-1][:retrieve_k]
 
                 for rank, idx in enumerate(bm25_top_indices):
+                    if idx < 0 or idx >= len(self.chunks):
+                        continue
                     rrf_contribution = query_weight * (1.0 / (60 + rank + 1))
 
                     if idx in candidates:
@@ -964,6 +972,9 @@ def search_mpep(
 @mcp.tool()
 def get_mpep_section(section_number: str, max_chunks: int = 50) -> dict[str, Any]:
     """Get all text chunks from a specific MPEP section number (e.g., "2100", "700", "608")."""
+    if mpep_index is None or not mpep_index.chunks:
+        return {"error": "MPEP index not loaded. Please initialize the server first."}
+
     # Find all chunks from the specified section
     section_pattern = f"MPEP {section_number}"
     matching_chunks = [
@@ -1671,7 +1682,9 @@ def create_block_diagram(
         # Convert connections to tuples with proper typing
 
         connections_tuples: list[tuple[str, str, Optional[str]]] = [
-            (conn[0], conn[1], conn[2] if len(conn) > 2 else None) for conn in connections
+            (conn[0], conn[1], conn[2] if len(conn) > 2 else None)
+            for conn in connections
+            if len(conn) >= 2
         ]
 
         generator = PatentDiagramGenerator()

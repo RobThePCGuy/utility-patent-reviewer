@@ -126,10 +126,15 @@ class ClaimsAnalyzer(BaseAnalyzer):
             # Check for dependency
             dep_match = re.search(r"claim (\d+)", claim_body, re.IGNORECASE)
             if dep_match:
-                claim["depends_on"] = int(dep_match.group(1))
+                dep_num = int(dep_match.group(1))
+                if dep_num != int(claim_num):  # Prevent self-referencing
+                    claim["depends_on"] = dep_num
 
-            # Extract limitations (a), (b), (c), etc.
-            lim_pattern = re.compile(r"\n\s*([a-z])\)\s+(.+?)(?=\n\s*[a-z]\)|$)", re.DOTALL)
+            # Extract limitations (a), (b), (c), (i), (ii), etc.
+            lim_pattern = re.compile(
+                r"\n\s*((?:[a-z]|[ivxlc]+))\)\s+(.+?)(?=\n\s*(?:[a-z]|[ivxlc]+)\)|$)",
+                re.DOTALL,
+            )
             limitations = lim_pattern.findall(claim_body)
             claim["limitations"] = [(letter, text.strip()) for letter, text in limitations]
 
@@ -219,15 +224,25 @@ class ClaimsAnalyzer(BaseAnalyzer):
                     )
                 )
 
-    def _build_element_registry(self, claim: dict, all_claims: list[dict]) -> set[str]:
+    def _build_element_registry(
+        self, claim: dict, all_claims: list[dict], visited: set[int] | None = None
+    ) -> set[str]:
         """Build set of all known elements from claim and its dependencies"""
+        if visited is None:
+            visited = set()
+
         known = set()
+
+        # Guard against circular dependency chains
+        if claim["number"] in visited:
+            return known
+        visited.add(claim["number"])
 
         # Add elements from dependent claims
         if claim["depends_on"]:
             parent = next((c for c in all_claims if c["number"] == claim["depends_on"]), None)
             if parent:
-                known.update(self._build_element_registry(parent, all_claims))
+                known.update(self._build_element_registry(parent, all_claims, visited))
 
         # Extract new elements from this claim
         new_matches = self.NEW_ELEMENT_PATTERN.finditer(claim["text"])
@@ -357,9 +372,10 @@ class ClaimsAnalyzer(BaseAnalyzer):
         if not claim["limitations"]:
             return "preamble"
 
-        # This is a simplified approach - in production would need more sophisticated parsing
+        # Find which limitation text contains the character position
         for letter, text in claim["limitations"]:
-            if text in claim["text"][max(0, char_position - 200) : char_position + 200]:
+            lim_start = claim["text"].find(text)
+            if lim_start != -1 and lim_start <= char_position < lim_start + len(text):
                 return f"limitation ({letter})"
 
         return "unknown location"
@@ -370,7 +386,17 @@ class ClaimsAnalyzer(BaseAnalyzer):
             if phrase.lower() in text.lower():
                 return f"limitation ({letter})"
 
-        if phrase.lower() in claim["text"][:200].lower():
+        # Detect preamble by finding the transitional phrase
+        claim_lower = claim["text"].lower()
+        transitional_phrases = ["comprising:", "consisting of:", "consisting essentially of:",
+                                "including:", "wherein:", "characterized by:"]
+        preamble_end = len(claim["text"])
+        for tp in transitional_phrases:
+            pos = claim_lower.find(tp)
+            if pos != -1 and pos < preamble_end:
+                preamble_end = pos
+
+        if phrase.lower() in claim_lower[:preamble_end]:
             return "preamble"
 
         return "body"
@@ -387,7 +413,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
         """Simple singularization (not perfect, but handles common cases)"""
         if word.endswith("ies"):
             return word[:-3] + "y"
-        elif word.endswith("es"):
+        elif word.endswith(("ses", "xes", "zes", "ches", "shes")):
             return word[:-2]
         elif word.endswith("s") and not word.endswith("ss"):
             return word[:-1]
@@ -395,7 +421,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
 
     def _pluralize(self, word: str) -> str:
         """Simple pluralization (not perfect, but handles common cases)"""
-        if word.endswith("y"):
+        if word.endswith("y") and len(word) >= 2 and word[-2] not in "aeiou":
             return word[:-1] + "ies"
         elif word.endswith(("s", "x", "z", "ch", "sh")):
             return word + "es"

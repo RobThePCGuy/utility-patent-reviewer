@@ -87,8 +87,6 @@ class PathFormatter:
         - CMD (default on Windows)
         - Bash/sh (Linux/macOS)
         """
-        str(Path(path).resolve())
-
         # Check for Git Bash or WSL
         if os.getenv("MSYSTEM") or os.getenv("WSL_DISTRO_NAME"):
             return PathFormatter.for_bash(path)
@@ -221,8 +219,6 @@ class PathValidator:
 
         Returns: Suggested fix command or instruction
         """
-        str(path)
-
         if "not found" in issue.lower():
             parent = Path(path).parent
             if parent.exists():

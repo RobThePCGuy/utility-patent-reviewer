@@ -103,7 +103,7 @@ class FormalitiesChecker(BaseAnalyzer):
 
         # Check for patent claim language (should avoid)
         forbidden_terms = ["means", "said", "whereby"]
-        found_forbidden = [term for term in forbidden_terms if f" {term} " in abstract.lower()]
+        found_forbidden = [term for term in forbidden_terms if re.search(rf"\b{re.escape(term)}\b", abstract, re.IGNORECASE)]
 
         result = {
             "word_count": word_count,
@@ -242,10 +242,10 @@ class FormalitiesChecker(BaseAnalyzer):
                 FormalityIssue(
                     section="title",
                     severity="INFO",
-                    problem="Title starts with article",
+                    problem="Title starts with an article",
                     current_value=f'Starts with "{title.split()[0]}"',
-                    required_value="Articles should be capitalized in title",
-                    fix="Ensure proper capitalization",
+                    required_value="Titles should not begin with articles (MPEP 606)",
+                    fix="Remove the leading article from the title",
                     mpep_ref="MPEP 606",
                 )
             )
@@ -315,7 +315,10 @@ class FormalitiesChecker(BaseAnalyzer):
         """Check drawing references and compliance"""
 
         # Extract figure references from specification
-        fig_pattern = re.compile(r"FIG(?:URE)?\.?\s*(\d+[A-Z]?)", re.IGNORECASE)
+        fig_pattern = re.compile(
+            r"FIGS?(?:URES?)?\.?\s*(\d+[A-Z]?(?:\([a-z]\))?(?:\s*-\s*\d+[A-Z]?)?)",
+            re.IGNORECASE,
+        )
         referenced_figures = set(fig_pattern.findall(specification))
 
         result = {
@@ -375,8 +378,6 @@ class FormalitiesChecker(BaseAnalyzer):
             else:
                 info += 1
 
-        total_checks = len(self.issues)
-
         # Count passed checks from results
         if results.get("abstract") and results["abstract"].get("compliant"):
             passed_checks += 1
@@ -387,7 +388,11 @@ class FormalitiesChecker(BaseAnalyzer):
         if results.get("drawings") and results["drawings"].get("compliant"):
             passed_checks += 1
 
+        total_checks = passed_checks + len(self.issues)
+
         return {
+            "total_checks": total_checks,
+            "passed_checks": passed_checks,
             "critical_issues": critical_issues,
             "warnings": warnings,
             "info": info,

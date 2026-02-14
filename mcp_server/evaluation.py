@@ -215,7 +215,7 @@ def main():
     """Run evaluation from command line"""
     import argparse
 
-    from server import mpep_index
+    from .server import mpep_index
 
     parser = argparse.ArgumentParser(description="Evaluate MPEP RAG System")
     parser.add_argument("--create-dataset", action="store_true", help="Create test dataset")

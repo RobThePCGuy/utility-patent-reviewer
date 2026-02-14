@@ -521,6 +521,8 @@ class PatentCorpusIndex:
         if bm25_scores is not None:
             bm25_ranked = np.argsort(bm25_scores)[::-1][: retrieve_k * 2]
             for rank, idx in enumerate(bm25_ranked):
+                if idx < 0 or idx >= len(self.chunks):
+                    continue
                 if idx in candidates:
                     candidates[idx]["bm25_score"] = float(bm25_scores[idx])
                     candidates[idx]["bm25_rank"] = rank + 1
