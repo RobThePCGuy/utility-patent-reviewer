@@ -328,10 +328,10 @@ def run_server(args):
 
     print("Initializing MPEP index...", file=sys.stderr)
 
-    global mpep_index
+    import mcp_server.server as server_module
     use_hyde = not args.no_hyde
-    mpep_index = MPEPIndex(use_hyde=use_hyde)
-    mpep_index.build_index(force_rebuild=False)
+    server_module.mpep_index = MPEPIndex(use_hyde=use_hyde)
+    server_module.mpep_index.build_index(force_rebuild=False)
 
     print("Starting MCP server...", file=sys.stderr)
     mcp.run()

@@ -106,7 +106,7 @@ class SystemHealthChecker:
                 "status": "corrupt",
                 "ready": False,
                 "error": str(e),
-                "fix": "patent-reviewer setup --rebuild-index",
+                "fix": "patent-reviewer setup --rebuild",
                 "details": "Index files exist but are corrupted. Rebuild required.",
             }
 

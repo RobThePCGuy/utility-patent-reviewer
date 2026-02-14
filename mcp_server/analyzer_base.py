@@ -34,13 +34,12 @@ class BaseAnalyzer(ABC):
     - Summary generation
     """
 
-    SEVERITY_ORDER = {"CRITICAL": 0, "IMPORTANT": 1, "MINOR": 2}
+    SEVERITY_ORDER = {"CRITICAL": 0, "IMPORTANT": 1, "WARNING": 2, "MINOR": 3, "INFO": 4}
 
     def __init__(self):
         """Initialize analyzer with empty issues list"""
         self.issues: list[BaseIssue] = []
 
-    @abstractmethod
     def analyze(self, *args, **kwargs) -> dict[str, Any]:
         """Main analysis method - override in subclass
 
@@ -49,7 +48,7 @@ class BaseAnalyzer(ABC):
         Returns:
             Analysis report dictionary
         """
-        pass
+        raise NotImplementedError("Subclasses must implement an analysis method")
 
     def _sort_issues(self, secondary_key=None):
         """Sort issues by severity (and optional secondary key)

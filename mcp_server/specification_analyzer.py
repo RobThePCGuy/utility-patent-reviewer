@@ -57,6 +57,8 @@ class SpecificationAnalyzer(BaseAnalyzer):
             Dictionary with analysis results including input validation warnings
         """
         self.issues = []
+        self.spec_paragraphs = {}
+        self.spec_index = defaultdict(list)
 
         # Validate input completeness
         warnings = []
@@ -195,7 +197,7 @@ class SpecificationAnalyzer(BaseAnalyzer):
 
         # Extract noun phrases (simplified - in production would use NLP)
         # Pattern for multi-word technical terms
-        term_pattern = re.compile(r"\b([a-z][a-z\s-]{2,30}[a-z])\b", re.IGNORECASE)
+        term_pattern = re.compile(r"\b([a-z](?:[a-z-]*[a-z])?(?:\s+[a-z](?:[a-z-]*[a-z])?){0,2})\b", re.IGNORECASE)
         matches = term_pattern.findall(text)
 
         terms = []
@@ -268,7 +270,7 @@ class SpecificationAnalyzer(BaseAnalyzer):
 
         # Pattern for "a/an/the [element]" constructions
         element_pattern = re.compile(
-            r"\b(?:a|an|the|said)\s+([a-z][a-z\s-]{2,40}?)(?=\s+(?:configured|comprising|wherein|that|for|to|with|is|are|which|having|including|and|connected|coupled|adapted|operable|operatively|communicatively|,|;|\.))",
+            r"\b(?:a|an|the|said)\s+([a-z][a-z\s-]{2,40}?)(?=\s+(?:configured|comprising|wherein|that|for|to|with|is|are|which|having|including|and|connected|coupled|adapted|operable|operatively|communicatively)|(?=[,;.]))",
             re.IGNORECASE,
         )
 
@@ -319,7 +321,7 @@ class SpecificationAnalyzer(BaseAnalyzer):
 
         # Search for element in paragraph text
         for para_num, para_text in self.spec_paragraphs.items():
-            if element_lower in para_text.lower():
+            if re.search(r'\b' + re.escape(element_lower) + r'\b', para_text.lower()):
                 matching_paras.add(para_num)
 
         # Try searching for individual words in multi-word elements
@@ -330,7 +332,7 @@ class SpecificationAnalyzer(BaseAnalyzer):
             if significant_words:
                 for para_num, para_text in self.spec_paragraphs.items():
                     para_lower = para_text.lower()
-                    matches = sum(1 for word in significant_words if word in para_lower)
+                    matches = sum(1 for word in significant_words if re.search(r'\b' + re.escape(word) + r'\b', para_lower))
                     if matches >= min(2, len(significant_words)):
                         matching_paras.add(para_num)
 

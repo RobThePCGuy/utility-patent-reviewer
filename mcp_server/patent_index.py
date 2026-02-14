@@ -509,7 +509,7 @@ class PatentCorpusIndex:
 
         # Add vector results
         for rank, (idx, score) in enumerate(zip(vector_indices, vector_scores)):
-            if idx < len(self.chunks):  # Valid index
+            if 0 <= idx < len(self.chunks):  # Valid index
                 candidates[int(idx)] = {
                     "text": self.chunks[idx],
                     "metadata": self.metadata[idx],

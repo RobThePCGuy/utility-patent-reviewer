@@ -29,17 +29,17 @@ class ClaimsAnalyzer(BaseAnalyzer):
     # Regex patterns based on plint and research
     NEW_ELEMENT_PATTERN = re.compile(
         r"\b(a|an|at least one|one or more|more than one|two or more|"
-        r"plurality of|one|two|three|four|five|six|seven|eight|nine|ten)\s+([a-z][a-z\s-]+?)(?=\s+(?:configured|comprising|wherein|that|for|to|with|,|;|\.))",
+        r"plurality of|one|two|three|four|five|six|seven|eight|nine|ten)\s+([a-z][a-z\s-]+?)(?=\s+(?:configured|comprising|wherein|that|for|to|with)|(?=[,;.]))",
         re.IGNORECASE,
     )
 
     THE_ELEMENT_PATTERN = re.compile(
-        r"\bthe\s+([a-z][a-z\s-]+?)(?=\s+(?:configured|comprising|wherein|that|for|to|with|is|are|was|were|,|;|\.))",
+        r"\bthe\s+([a-z][a-z\s-]+?)(?=\s+(?:configured|comprising|wherein|that|for|to|with|is|are|was|were)|(?=[,;.]))",
         re.IGNORECASE,
     )
 
     SAID_ELEMENT_PATTERN = re.compile(
-        r"\bsaid\s+([a-z][a-z\s-]+?)(?=\s+(?:configured|comprising|wherein|that|for|to|with|is|are|was|were|,|;|\.))",
+        r"\bsaid\s+([a-z][a-z\s-]+?)(?=\s+(?:configured|comprising|wherein|that|for|to|with|is|are|was|were)|(?=[,;.]))",
         re.IGNORECASE,
     )
 
@@ -110,7 +110,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
         claims = []
 
         # Split by claim numbers (e.g., "1.", "2.", "10.")
-        claim_pattern = re.compile(r"(?:^|\n)(\d+)\.\s+(.+?)(?=\n\d+\.|$)", re.DOTALL)
+        claim_pattern = re.compile(r"(?:^|\n)\s*(\d+)\.\s+(.+?)(?=\n\s*\d+\.|$)", re.DOTALL)
         matches = claim_pattern.findall(claims_text)
 
         for claim_num, claim_body in matches:
@@ -132,7 +132,7 @@ class ClaimsAnalyzer(BaseAnalyzer):
 
             # Extract limitations (a), (b), (c), (i), (ii), etc.
             lim_pattern = re.compile(
-                r"\n\s*((?:[a-z]|[ivxlc]+))\)\s+(.+?)(?=\n\s*(?:[a-z]|[ivxlc]+)\)|$)",
+                r"\n\s*\(?((?:[a-z]|[ivxlc]+))\)\s+(.+?)(?=\n\s*\(?(?:[a-z]|[ivxlc]+)\)|$)",
                 re.DOTALL,
             )
             limitations = lim_pattern.findall(claim_body)
@@ -516,8 +516,8 @@ class ClaimsAnalyzer(BaseAnalyzer):
         if claim_count == 0:
             return 0.0
 
-        # Deduct points based on issue severity
-        deductions = (critical * 15) + (important * 5) + (minor * 1)
+        # Deduct points based on issue severity, normalized by claim count
+        deductions = ((critical * 15) + (important * 5) + (minor * 1)) / max(claim_count, 1)
         score = max(0, 100 - deductions)
 
         return float(score)

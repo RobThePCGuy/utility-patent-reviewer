@@ -356,8 +356,8 @@ class MPEPIndex:
                 "has_mpep_ref": has_mpep_ref,
                 "has_usc_ref": has_usc_ref,
                 "has_cfr_ref": has_cfr_ref,
-                "has_statute": has_usc_ref,
-                "has_rule_ref": has_cfr_ref,
+                "has_statute": base_metadata.get("has_statute", False) or has_usc_ref,
+                "has_rule_ref": base_metadata.get("has_rule_ref", False) or has_cfr_ref,
             }
 
             chunks.append(chunk_metadata)
@@ -617,6 +617,10 @@ class MPEPIndex:
                     )
                     tokenized = [chunk.lower().split() for chunk in self.chunks]
                     self.bm25 = BM25Okapi(tokenized)
+            elif not force_rebuild and BM25Okapi and self.chunks:
+                print("BM25 index file missing, rebuilding from chunks...", file=sys.stderr)
+                tokenized = [chunk.lower().split() for chunk in self.chunks]
+                self.bm25 = BM25Okapi(tokenized)
             return
 
         # Build new index from all available sources
@@ -886,6 +890,9 @@ class MPEPIndex:
         sorted_candidates = sorted(
             candidates.items(), key=lambda x: x[1]["rrf_score"], reverse=True
         )[:retrieve_k]
+
+        if not sorted_candidates:
+            return []
 
         # Rerank with cross-encoder using ORIGINAL query only
         rerank_pairs = [[query, cand[1]["text"]] for cand in sorted_candidates]
@@ -1899,8 +1906,9 @@ def _handle_additional_downloads(args):
                 f"\n35 USC already exists at {MPEP_DIR / USC_35_FILE}",
                 file=sys.stderr,
             )
-        if download_35_usc():
-            downloads_performed.append("35 USC")
+        else:
+            if download_35_usc():
+                downloads_performed.append("35 USC")
 
     # Download 37 CFR
     if args.download_all or args.download_regulations:
@@ -1909,8 +1917,9 @@ def _handle_additional_downloads(args):
                 f"\n37 CFR already exists at {MPEP_DIR / CFR_37_FILE}",
                 file=sys.stderr,
             )
-        if download_37_cfr():
-            downloads_performed.append("37 CFR")
+        else:
+            if download_37_cfr():
+                downloads_performed.append("37 CFR")
 
     # Download Subsequent Publications
     if args.download_all or args.download_updates:
@@ -1919,8 +1928,9 @@ def _handle_additional_downloads(args):
                 f"\nSubsequent Publications already exists at {MPEP_DIR / SUBSEQUENT_PUBS_FILE}",
                 file=sys.stderr,
             )
-        if download_subsequent_publications():
-            downloads_performed.append("Subsequent Publications")
+        else:
+            if download_subsequent_publications():
+                downloads_performed.append("Subsequent Publications")
 
     # Summary
     if downloads_performed:

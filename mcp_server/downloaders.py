@@ -86,10 +86,14 @@ class FileDownloader:
             print(
                 "Your connection may be too slow or the server is not responding", file=sys.stderr
             )
+            if dest_path.exists():
+                dest_path.unlink()
             return False
 
         except Exception as e:
             print(f"\n✗ Download failed: {e}", file=sys.stderr)
+            if dest_path.exists():
+                dest_path.unlink()
             if manual_instructions:
                 print("\nManual download instructions:", file=sys.stderr)
                 print(manual_instructions, file=sys.stderr)
